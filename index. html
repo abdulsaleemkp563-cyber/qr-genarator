@@ -1,1 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Khata Book Pro V21</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --app-height: 100vh; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            height: var(--app-height);
+            overflow: hidden;
+            background-color: #f1f5f9;
+        }
+        .app-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            background: #ffffff;
+            position: relative;
+        }
+        .scroll-area { flex: 1; overflow-y: auto; padding-bottom: 110px; }
+        .sticky-footer {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: white; padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+            border-top: 1px solid #e2e8f0; z-index: 100;
+        }
+        .khata-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .khata-table th, .khata-table td { border: 1px solid #e2e8f0; padding: 10px 6px; text-align: center; font-size: 12px; }
+        .khata-table th { background: #f8fafc; font-weight: 800; color: #64748b; font-size: 10px; text-transform: uppercase; }
+        .amt-get { color: #059669; font-weight: 800; }
+        .amt-give { color: #dc2626; font-weight: 800; }
+        .active-scale:active { transform: scale(0.96); transition: 0.1s; }
+        
+        /* A4 PDF Print Styles */
+        @media print {
+            @page { size: A4; margin: 1.5cm; }
+            body { background: white !important; height: auto !important; overflow: visible !important; width: 100% !important; }
+            .no-print, header, footer, #modalOverlay:not(.printing-mode), button { display: none !important; }
+            .app-container { max-width: 100% !important; height: auto !important; position: static !important; box-shadow: none !important; border: none !important; }
+            #modalOverlay.printing-mode { position: absolute !important; display: block !important; background: white !important; inset: 0 !important; z-index: 9999 !important; width: 100% !important; }
+            #reportModal { display: block !important; position: static !important; height: auto !important; max-height: none !important; width: 100% !important; padding: 0 !important; border-radius: 0 !important; }
+            .print-header { display: block !important; text-align: center; margin-bottom: 20px; border-bottom: 2px solid black; padding-bottom: 10px; }
+            .khata-table { border: 1.5px solid #000 !important; width: 100% !important; }
+            .khata-table th, .khata-table td { border: 1px solid #000 !important; color: black !important; font-size: 12px !important; }
+            .summary-box { display: grid !important; grid-template-cols: 1fr 1fr; gap: 20px; border: 1px solid black; padding: 10px; margin-bottom: 20px; }
+            .report-title-text { font-size: 20px !important; font-weight: bold !important; margin-bottom: 5px !important; }
+        }
 
+        #qr-container {
+            display: flex; justify-content: center; align-items: center;
+            background: white; padding: 15px; border-radius: 20px;
+            border: 3px solid #4338ca; margin: 0 auto 15px auto;
+            width: 180px; height: 180px;
+        }
+        #qr-container img { width: 100%; height: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container no-print">
+        <!-- Header -->
+        <header class="bg-indigo-700 text-white px-5 py-4 flex justify-between items-center shrink-0 shadow-lg">
+            <div class="flex items-center gap-3">
+                <button id="backBtn" class="hidden w-10 h-10 flex items-center justify-center rounded-full bg-white/10 active-scale" onclick="goHome()">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <h1 id="headerTitle" class="text-lg font-black tracking-tight uppercase">My Khata</h1>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="openReportModal()" class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center active-scale">
+                    <i class="fa-solid fa-file-invoice"></i>
+                </button>
+                <button id="searchToggle" onclick="toggleSearch()" class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center active-scale">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+                <button onclick="openSettings()" class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center active-scale">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Search Bar -->
+        <div id="searchContainer" class="hidden px-4 py-3 bg-indigo-50 border-b">
+            <input type="text" id="searchInput" oninput="filterList()" placeholder="തിരയുക..." class="w-full p-3 rounded-xl border border-indigo-200 outline-none font-bold">
+        </div>
+
+        <!-- Content -->
+        <main id="appContent" class="scroll-area"></main>
+
+        <!-- Footer -->
+        <footer class="sticky-footer">
+            <div id="homeFooter">
+                <button onclick="openCustomerModal()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black active-scale shadow-xl flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-user-plus"></i> പുതിയ കസ്റ്റമർ
+                </button>
+            </div>
+            <div id="detailActions" class="hidden flex gap-3">
+                <button onclick="openTransModal('GAVE')" class="flex-1 bg-rose-600 text-white py-4 rounded-2xl font-black active-scale shadow-lg">നൽകി (GIVE)</button>
+                <button onclick="openTransModal('GOT')" class="flex-1 bg-emerald-600 text-white py-4 rounded-2xl font-black active-scale shadow-lg">ലഭിച്ചു (GET)</button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <div id="modalOverlay" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[200] flex items-end justify-center">
+        
+        <!-- Report Modal -->
+        <div id="reportModal" class="hidden bg-white w-full max-w-md p-6 rounded-t-[40px] max-h-[90vh] flex flex-col">
+            <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-6 no-print"></div>
+            
+            <!-- Print Header -->
+            <div class="print-header hidden">
+                <h1 class="report-title-text" id="mainReportHeader">KHATA BOOK REPORT</h1>
+                <p id="printRangeLabel" style="font-size: 14px; color: #333;"></p>
+                <p style="font-size: 11px; margin-top: 5px; color: #666;">Generated on: <span class="genDateSpan"></span></p>
+            </div>
+
+            <h2 class="text-xl font-black mb-4 uppercase no-print" id="reportModalTitle">Report Summary</h2>
+            
+            <div class="grid grid-cols-2 gap-3 mb-4 no-print">
+                <div class="flex flex-col gap-1">
+                    <span class="text-[9px] font-bold text-slate-400">FROM DATE</span>
+                    <input type="date" id="reportFrom" class="p-3 bg-slate-50 rounded-xl font-bold border text-sm">
+                </div>
+                <div class="flex flex-col gap-1">
+                    <span class="text-[9px] font-bold text-slate-400">TO DATE</span>
+                    <input type="date" id="reportTo" class="p-3 bg-slate-50 rounded-xl font-bold border text-sm">
+                </div>
+            </div>
+            
+            <div class="flex gap-2 mb-4 no-print">
+                <button onclick="generateReport()" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-black active-scale uppercase">View Report</button>
+                <button onclick="printCurrentReport()" class="bg-slate-800 text-white px-5 rounded-xl font-black active-scale"><i class="fa-solid fa-print"></i> PDF</button>
+            </div>
+            
+            <div id="reportResult" class="overflow-y-auto flex-1 bg-white">
+                <!-- Data Table -->
+            </div>
+            
+            <button onclick="closeModal()" class="w-full py-4 font-bold text-slate-400 no-print">Close</button>
+        </div>
+
+        <!-- Customer Modal (Add/Edit) -->
+        <div id="customerForm" class="hidden bg-white w-full max-w-md p-8 rounded-t-[40px]">
+            <h2 id="custFormTitle" class="text-xl font-black mb-6 uppercase">Add Customer</h2>
+            <input type="hidden" id="editCustId">
+            <input type="text" id="custName" placeholder="പേര്" class="w-full bg-slate-50 p-4 rounded-xl mb-4 font-bold border">
+            <input type="number" id="custPhone" placeholder="മൊബൈൽ" class="w-full bg-slate-50 p-4 rounded-xl mb-4 font-bold border">
+            <button onclick="saveCustomer()" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-black shadow-lg uppercase">Save Customer</button>
+            <button onclick="closeModal()" class="w-full py-4 font-bold text-slate-300">Close</button>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsForm" class="hidden bg-white w-full max-w-md p-8 rounded-t-[40px]">
+            <h2 class="text-xl font-black mb-6 uppercase">Settings</h2>
+            <div class="space-y-4">
+                <button onclick="exportBackup()" class="w-full bg-slate-100 p-4 rounded-xl font-bold flex justify-between items-center active-scale"><span>Backup Data</span><i class="fa-solid fa-download"></i></button>
+                <button onclick="triggerImport()" class="w-full bg-slate-100 p-4 rounded-xl font-bold flex justify-between items-center active-scale"><span>Restore Data</span><i class="fa-solid fa-upload"></i></button>
+                <input type="file" id="importFile" class="hidden" accept=".json" onchange="importBackup(event)">
+            </div>
+            <button onclick="closeModal()" class="w-full py-5 mt-6 font-bold text-slate-400">Close</button>
+        </div>
+
+        <!-- Entry Form -->
+        <div id="transForm" class="hidden bg-white w-full max-w-md p-8 rounded-t-[40px]">
+            <div class="flex justify-between items-center mb-6"><h2 id="transFormTitle" class="text-xl font-black">ENTRY</h2><button id="deleteTransBtn" onclick="deleteTransaction()" class="text-rose-500 bg-rose-50 w-10 h-10 rounded-full"><i class="fa-solid fa-trash"></i></button></div>
+            <input type="hidden" id="editTransId"><input type="hidden" id="transType">
+            <div class="space-y-4">
+                <input type="date" id="transDate" class="w-full bg-slate-50 p-4 rounded-xl font-bold border">
+                <input type="number" id="amount" placeholder="₹ 0" class="w-full bg-slate-50 p-5 rounded-xl text-4xl font-black text-indigo-700 text-center border">
+                <input type="text" id="remark" placeholder="വിവരണം (Optional)" class="w-full bg-slate-50 p-4 rounded-xl font-bold border">
+            </div>
+            <button onclick="saveTransaction()" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-black mt-6">SAVE ENTRY</button>
+            <button onclick="closeModal()" class="w-full py-4 font-bold text-slate-300">Back</button>
+        </div>
+
+        <!-- Payment/QR Modal -->
+        <div id="paymentModal" class="hidden bg-white w-full max-w-md p-8 rounded-t-[40px]">
+            <h2 class="text-xl font-black text-center mb-1">WhatsApp Request</h2>
+            <p id="payTargetName" class="text-slate-400 font-bold text-center text-xs mb-6"></p>
+            <div id="qrDisplayArea">
+                <div id="qr-container"><img id="qrImageElement" src="" alt="QR"></div>
+                <div class="bg-indigo-50 p-4 rounded-2xl mb-6 text-center">
+                    <p id="payAmountDisplay" class="text-3xl font-black text-indigo-700"></p>
+                </div>
+            </div>
+            <button onclick="whatsappWithQR()" class="w-full bg-emerald-600 text-white py-4 rounded-xl font-black flex items-center justify-center gap-3"><i class="fa-brands fa-whatsapp"></i> SEND WHATSAPP</button>
+            <button onclick="closeModal()" class="w-full py-4 font-bold text-slate-400">Close</button>
+        </div>
+    </div>
+
+    <script>
+        let db = JSON.parse(localStorage.getItem('khata_pro_v21')) || { customers: [], trans: [] };
+        let activeCid = null;
+        let reportTargetCid = null; // null for all, CID for specific customer
+        const myUPI = "abdulsaleemkp563-3@okhdfcbank";
+
+        const sync = () => localStorage.setItem('khata_pro_v21', JSON.stringify(db));
+        const getBalance = (cid) => db.trans.filter(t => t.cid == cid).reduce((a, t) => t.type === 'GAVE' ? a + t.amt : a - t.amt, 0);
+
+        function renderHome(filtered = null) {
+            const listData = filtered || db.customers;
+            let totalGave = 0, totalGot = 0;
+            const list = listData.map(c => {
+                const bal = getBalance(c.id);
+                if (bal > 0) totalGave += bal; else totalGot += Math.abs(bal);
+                return `
+                <div class="bg-white p-5 border-b flex justify-between items-center active-scale" onclick="showDetail(${c.id})">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black text-lg">${c.name.charAt(0).toUpperCase()}</div>
+                        <div><p class="font-black text-slate-800 text-md">${c.name}</p><p class="text-[10px] text-slate-400 font-bold">${c.phone || ''}</p></div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-md font-black ${bal >= 0 ? 'text-rose-600' : 'text-emerald-600'}">₹${Math.abs(bal)}</p>
+                        <span class="text-[8px] font-black uppercase ${bal >= 0 ? 'text-rose-400' : 'text-emerald-400'}">${bal >= 0 ? 'നൽകാൻ' : 'ലഭിക്കാൻ'}</span>
+                    </div>
+                </div>`;
+            }).join('');
+
+            document.getElementById('appContent').innerHTML = `
+                <div class="grid grid-cols-2 gap-3 p-4 bg-slate-50 border-b">
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border-b-4 border-rose-500"><p class="text-[9px] font-black text-slate-400 uppercase">Give (നൽകാൻ)</p><p class="text-xl font-black text-rose-600">₹${totalGave}</p></div>
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border-b-4 border-emerald-500"><p class="text-[9px] font-black text-slate-400 uppercase">Get (ലഭിക്കാൻ)</p><p class="text-xl font-black text-emerald-600">₹${totalGot}</p></div>
+                </div>
+                ${list || '<div class="py-20 text-center opacity-30 font-bold uppercase">No Customers Found</div>'}
+            `;
+        }
+
+        function renderDetail(cid) {
+            const items = db.trans.filter(t => t.cid == cid).sort((a,b) => new Date(b.date) - new Date(a.date));
+            const c = db.customers.find(x => x.id == cid);
+            const bal = getBalance(cid);
+            let rows = items.map(t => `<tr onclick="openEditTrans(${t.id})" class="active:bg-slate-50"><td>${t.date.split('-').reverse().join('/')}</td><td class="amt-get text-emerald-600">${t.type === 'GOT' ? '₹'+t.amt : '-'}</td><td class="amt-give text-rose-600">${t.type === 'GAVE' ? '₹'+t.amt : '-'}</td></tr>`).join('');
+            document.getElementById('appContent').innerHTML = `
+                <div class="p-6 bg-indigo-700 text-white shadow-lg">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex flex-col gap-1">
+                            <div class="flex items-center gap-3">
+                                <h2 class="text-2xl font-black">${c.name}</h2>
+                                <button onclick="openCustomerModal(${cid})" class="text-white/50 hover:text-white transition-colors"><i class="fa-solid fa-pen-to-square text-lg"></i></button>
+                            </div>
+                            <p class="text-xs opacity-70 font-bold tracking-wide">${c.phone || 'No Mobile'}</p>
+                        </div>
+                        <div class="flex gap-2">
+                             <button onclick="openReportModal(${cid})" class="bg-white/10 w-10 h-10 rounded-xl flex items-center justify-center"><i class="fa-solid fa-file-pdf"></i></button>
+                             <button onclick="openPaymentModal(${cid})" class="bg-emerald-500 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"><i class="fa-brands fa-whatsapp text-xl"></i></button>
+                             <button onclick="deleteCustomer(${cid})" class="bg-white/10 w-10 h-10 rounded-xl flex items-center justify-center"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                    <div><p class="text-[9px] opacity-60 font-black">CURRENT BALANCE</p><h2 class="text-4xl font-black">₹${Math.abs(bal)}</h2><p class="text-[9px] font-bold mt-2 px-3 py-1 bg-white/20 rounded-full inline-block uppercase">${bal >= 0 ? 'നൽകാൻ' : 'ലഭിക്കാൻ'}</p></div>
+                </div>
+                <div class="p-3"><table class="khata-table rounded-xl overflow-hidden shadow-sm"><thead><tr><th>DATE</th><th>GET</th><th>GIVE</th></tr></thead><tbody>${rows || '<tr><td colspan="3" class="py-10 text-slate-300 uppercase">No Data</td></tr>'}</tbody></table></div>
+            `;
+        }
+
+        // REPORT SYSTEM
+        window.openReportModal = (cid = null) => {
+            reportTargetCid = cid;
+            const d = new Date().toISOString().split('T')[0];
+            document.getElementById('reportFrom').value = d;
+            document.getElementById('reportTo').value = d;
+            document.getElementById('reportResult').innerHTML = "";
+            
+            if(cid) {
+                const c = db.customers.find(x => x.id == cid);
+                document.getElementById('reportModalTitle').innerText = "Customer Report";
+                document.getElementById('mainReportHeader').innerText = c.name.toUpperCase() + " - KHATA REPORT";
+            } else {
+                document.getElementById('reportModalTitle').innerText = "All Transactions";
+                document.getElementById('mainReportHeader').innerText = "KHATA BOOK FULL REPORT";
+            }
+            showModal('reportModal');
+        };
+
+        window.generateReport = () => {
+            const from = document.getElementById('reportFrom').value;
+            const to = document.getElementById('reportTo').value;
+            
+            let data = db.trans.filter(t => t.date >= from && t.date <= to);
+            if(reportTargetCid) data = data.filter(t => t.cid == reportTargetCid);
+            
+            data = data.sort((a,b) => new Date(a.date) - new Date(b.date));
+            
+            let tGave = 0, tGot = 0;
+            const rows = data.map(t => {
+                const c = db.customers.find(x => x.id == t.cid);
+                if(t.type === 'GAVE') tGave += t.amt; else tGot += t.amt;
+                return `<tr><td>${t.date.split('-').reverse().join('/')}</td><td class="text-left font-bold">${c?c.name:'Deleted User'}</td><td class="text-emerald-600 font-bold">${t.type==='GOT'?'₹'+t.amt:'-'}</td><td class="text-rose-600 font-bold">${t.type==='GAVE'?'₹'+t.amt:'-'}</td></tr>`;
+            }).join('');
+
+            document.getElementById('printRangeLabel').innerText = `Period: ${from.split('-').reverse().join('/')} to ${to.split('-').reverse().join('/')}`;
+            document.querySelectorAll('.genDateSpan').forEach(s => s.innerText = new Date().toLocaleString());
+            
+            document.getElementById('reportResult').innerHTML = `
+                <div class="summary-box grid grid-cols-2 gap-2 mb-4 no-print">
+                    <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 text-center"><p class="text-[9px] font-black text-emerald-600 uppercase">Total Got</p><p class="text-lg font-black text-emerald-700">₹${tGot}</p></div>
+                    <div class="bg-rose-50 p-3 rounded-xl border border-rose-100 text-center"><p class="text-[9px] font-black text-rose-600 uppercase">Total Gave</p><p class="text-lg font-black text-rose-700">₹${tGave}</p></div>
+                </div>
+                <table class="khata-table">
+                    <thead><tr><th>Date</th><th>Customer</th><th>Got</th><th>Gave</th></tr></thead>
+                    <tbody>${rows || '<tr><td colspan="4" class="py-10">No records found</td></tr>'}</tbody>
+                </table>
+                <div class="mt-4 p-4 bg-slate-50 border text-center font-black text-sm uppercase">
+                    NET TOTAL: ₹${Math.abs(tGot - tGave)} (${tGot>=tGave?'GET':'GIVE'})
+                </div>
+            `;
+        };
+
+        window.printCurrentReport = () => {
+            if(!document.getElementById('reportResult').innerHTML.includes('table')) return alert("Generate report first");
+            document.getElementById('modalOverlay').classList.add('printing-mode');
+            window.print();
+            setTimeout(() => { document.getElementById('modalOverlay').classList.remove('printing-mode'); }, 1000);
+        };
+
+        // CUSTOMER ADD/EDIT
+        window.openCustomerModal = (cid = null) => {
+            if(cid) {
+                const c = db.customers.find(x => x.id == cid);
+                document.getElementById('editCustId').value = cid;
+                document.getElementById('custName').value = c.name;
+                document.getElementById('custPhone').value = c.phone || "";
+                document.getElementById('custFormTitle').innerText = "Edit Customer Info";
+            } else {
+                document.getElementById('editCustId').value = "";
+                document.getElementById('custName').value = "";
+                document.getElementById('custPhone').value = "";
+                document.getElementById('custFormTitle').innerText = "Add New Customer";
+            }
+            showModal('customerForm');
+        };
+
+        window.saveCustomer = () => {
+            const n = document.getElementById('custName').value.trim();
+            const p = document.getElementById('custPhone').value.trim();
+            const eid = document.getElementById('editCustId').value;
+            if(!n) return alert("പേര് നിർബന്ധമാണ്");
+            
+            if(eid) {
+                const idx = db.customers.findIndex(x => x.id == eid);
+                db.customers[idx] = { ...db.customers[idx], name: n, phone: p };
+                sync(); closeModal(); renderDetail(eid);
+            } else {
+                db.customers.push({id: Date.now(), name: n, phone: p});
+                sync(); closeModal(); renderHome();
+            }
+        };
+
+        // CORE LOGIC
+        function showModal(id) { 
+            document.getElementById('modalOverlay').classList.remove('hidden'); 
+            document.querySelectorAll('#modalOverlay > div').forEach(d => d.classList.add('hidden')); 
+            document.getElementById(id).classList.remove('hidden'); 
+        }
+        window.closeModal = () => document.getElementById('modalOverlay').classList.add('hidden');
+        window.openSettings = () => showModal('settingsForm');
+        window.exportBackup = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(db)])); a.download = `Khata_Backup.json`; a.click(); };
+        window.triggerImport = () => document.getElementById('importFile').click();
+        window.importBackup = (e) => { const r = new FileReader(); r.onload = (ev) => { db = JSON.parse(ev.target.result); sync(); location.reload(); }; r.readAsText(e.target.files[0]); };
+
+        window.saveTransaction = () => {
+            const a = Number(document.getElementById('amount').value);
+            const d = document.getElementById('transDate').value;
+            const eid = document.getElementById('editTransId').value;
+            if(a && d) {
+                if(eid) { const idx = db.trans.findIndex(x=>x.id==eid); db.trans[idx] = {...db.trans[idx], amt: a, date: d, desc: document.getElementById('remark').value}; }
+                else { db.trans.push({id: Date.now(), cid: activeCid, amt: a, type: document.getElementById('transType').value, date: d, desc: document.getElementById('remark').value}); }
+                sync(); closeModal(); renderDetail(activeCid);
+            }
+        };
+
+        window.showDetail = (id) => {
+            activeCid = id;
+            const c = db.customers.find(x=>x.id==id);
+            document.getElementById('headerTitle').innerText = "Details";
+            document.getElementById('backBtn').classList.remove('hidden');
+            document.getElementById('homeFooter').classList.add('hidden');
+            document.getElementById('detailActions').classList.remove('hidden');
+            renderDetail(id);
+        };
+
+        window.goHome = () => {
+            activeCid = null;
+            document.getElementById('headerTitle').innerText = 'MY KHATA';
+            document.getElementById('backBtn').classList.add('hidden');
+            document.getElementById('homeFooter').classList.remove('hidden');
+            document.getElementById('detailActions').classList.add('hidden');
+            renderHome();
+        };
+
+        window.openTransModal = (type) => {
+            document.getElementById('transType').value = type;
+            document.getElementById('editTransId').value = "";
+            document.getElementById('amount').value = "";
+            document.getElementById('transDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('deleteTransBtn').classList.add('hidden');
+            document.getElementById('remark').value = "";
+            showModal('transForm');
+        };
+
+        window.openEditTrans = (tid) => {
+            const t = db.trans.find(x=>x.id==tid);
+            document.getElementById('editTransId').value = t.id;
+            document.getElementById('amount').value = t.amt;
+            document.getElementById('transDate').value = t.date;
+            document.getElementById('remark').value = t.desc || "";
+            document.getElementById('deleteTransBtn').classList.remove('hidden');
+            showModal('transForm');
+        };
+
+        window.openPaymentModal = (cid) => {
+            const c = db.customers.find(x=>x.id==cid);
+            const bal = getBalance(cid);
+            activeCid = cid;
+            document.getElementById('payTargetName').innerText = c.name;
+            if(bal < 0) {
+                const abs = Math.abs(bal);
+                document.getElementById('qrDisplayArea').classList.remove('hidden');
+                document.getElementById('payAmountDisplay').innerText = `₹${abs}`;
+                document.getElementById('qrImageElement').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`upi://pay?pa=${myUPI}&pn=MyKhata&am=${abs}&cu=INR`)}`;
+            } else { document.getElementById('qrDisplayArea').classList.add('hidden'); }
+            showModal('paymentModal');
+        };
+
+        window.whatsappWithQR = () => {
+            const c = db.customers.find(x=>x.id==activeCid);
+            const bal = getBalance(activeCid);
+            let msg = bal < 0 ? `ഹലോ ${c.name}, ഖാത്ത പ്രകാരം ബാക്കി ₹${Math.abs(bal)} ആണ്. UPI വഴി പേ ചെയ്യാം: upi://pay?pa=${myUPI}&pn=MyKhata&am=${Math.abs(bal)}&cu=INR` : `ഹലോ ${c.name}, ഖാത്ത അപ്‌ഡേറ്റ് ചെയ്തിട്ടുണ്ട്.`;
+            window.open(`https://wa.me/91${c.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        };
+
+        window.toggleSearch = () => {
+            const s = document.getElementById('searchContainer');
+            s.classList.toggle('hidden');
+            if(!s.classList.contains('hidden')) document.getElementById('searchInput').focus();
+        };
+
+        window.filterList = () => renderHome(db.customers.filter(c => c.name.toLowerCase().includes(document.getElementById('searchInput').value.toLowerCase())));
+        window.deleteTransaction = () => { if(confirm("ഈ എൻട്രി നീക്കം ചെയ്യട്ടെ?")) { db.trans = db.trans.filter(t=>t.id!=document.getElementById('editTransId').value); sync(); closeModal(); renderDetail(activeCid); } };
+        window.deleteCustomer = (id) => { if(confirm("ഈ കസ്റ്റമറെ പൂർണ്ണമായും ഒഴിവാക്കട്ടെ?")) { db.customers = db.customers.filter(c=>c.id!=id); db.trans = db.trans.filter(t=>t.cid!=id); sync(); goHome(); } };
+
+        window.onload = () => { 
+            document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+            renderHome(); 
+        };
+    </script>
+</body>
+</html>
