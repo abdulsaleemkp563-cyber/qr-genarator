@@ -1,1 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KHATA PRO | v122</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        :root { --brand-yellow: #facc15; --bg-green: #2d4a3e; }
+        
+        body.dark-mode { background: var(--bg-green); color: #f8fafc; }
+        body.light-mode { background: #f8fafc; color: #0f172a; }
+        
+        .header-custom { background-color: #b58916; padding: 12px 16px; color: black; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .icon-btn-box { background: rgba(0,0,0,0.1); width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: black; border: none; cursor: pointer; }
+        .stat-label-yellow { background-color: var(--brand-yellow); color: black; padding: 5px 22px; border-radius: 8px; font-weight: 800; font-size: 18px; display: inline-block; text-transform: uppercase; }
+        .main-balance-text { font-size: 38px; font-weight: 800; margin-top: 5px; letter-spacing: -1px; }
+        .action-oval-btn { background-color: #b58916; color: black; padding: 14px 45px; border-radius: 50px; font-weight: 800; font-size: 22px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: 0.2s; }
+        .action-oval-btn:active { transform: scale(0.95); }
 
+        .text-main { color: inherit; }
+        .dark-mode .list-card { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.05); }
+        .light-mode .list-card { background: #ffffff; border: 1px solid #e2e8f0; }
+
+        .trans-row td { padding: 15px 10px; border-bottom: 1px solid rgba(0,0,0,0.08); }
+        .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        
+        @keyframes blink-red { 0% { background-color: #ef4444; } 50% { background-color: #991b1b; } 100% { background-color: #ef4444; } }
+        .overdue-blink { animation: blink-red 1s infinite; color: white !important; }
+        
+        .monthly-stats-row { display: flex; justify-content: space-between; background: rgba(0,0,0,0.15); border-radius: 16px; padding: 12px; margin-top: 15px; gap: 10px; }
+        .stat-item { flex: 1; text-align: center; }
+        .stat-item span { font-size: 8px; font-weight: 800; opacity: 0.6; display: block; text-transform: uppercase; margin-bottom: 2px; }
+        .stat-item p { font-size: 14px; font-weight: 800; }
+        .divider-v { width: 1px; background: rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="dark-mode">
+
+    <div id="lockScreen" class="fixed inset-0 bg-[#0b0f1a] z-[9999] flex flex-col items-center justify-center p-8">
+        <div class="mb-8 text-center">
+            <div class="w-20 h-20 bg-blue-600 rounded-3xl mx-auto mb-4 flex items-center justify-center shadow-2xl"><i class="fa-solid fa-vault text-4xl text-white"></i></div>
+            <h2 class="text-2xl font-black text-white tracking-widest uppercase">Khata Pro</h2>
+        </div>
+        <div class="flex gap-4 mb-12">
+            <script>for(let i=0;i<4;i++) document.write(`<div id="dot-${i}" class="w-4 h-4 rounded-full border-2 border-blue-500 transition-all"></div>`);</script>
+        </div>
+        <div class="grid grid-cols-3 gap-4 w-full max-w-[280px]">
+            <script>for(let i=1;i<=9;i++) document.write(`<button class="aspect-square rounded-2xl bg-white/5 text-2xl font-bold text-white active:bg-blue-600" onclick="pressKey('${i}')">${i}</button>`);</script>
+            <button class="text-blue-400 font-bold" onclick="currentPinInput='';updateDots()">CLR</button>
+            <button class="aspect-square rounded-2xl bg-white/5 text-2xl font-bold text-white active:bg-blue-600" onclick="pressKey('0')">0</button>
+            <button class="text-red-500 font-bold text-[10px]" onclick="resetPin()">RESET</button>
+        </div>
+    </div>
+
+    <div class="app max-w-[480px] mx-auto min-h-screen flex flex-col" id="mainApp" style="display:none;">
+        <header class="header-custom flex justify-between items-center sticky top-0 z-50">
+            <div class="flex items-center gap-3">
+                <button id="backBtn" onclick="goHome()" class="hidden text-black text-xl"><i class="fa-solid fa-arrow-left"></i></button>
+                <h1 id="pageTitle" class="text-xl font-black tracking-tight uppercase">KHATA PRO</h1>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="toggleTheme()" class="icon-btn-box"><i id="themeIcon" class="fa-solid fa-sun"></i></button>
+                <button onclick="lockApp()" class="icon-btn-box"><i class="fa-solid fa-lock text-red-900"></i></button>
+                <button id="custEditBtn" class="hidden icon-btn-box"><i class="fa-solid fa-user-pen text-blue-900"></i></button>
+                <button onclick="openSettings()" class="icon-btn-box"><i class="fa-solid fa-gear"></i></button>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-4 hide-scroll pb-40">
+            <div id="promiseHeader" class="mb-4 space-y-2"></div>
+            <div id="topStatsArea" class="text-center"></div>
+            <div id="homeActions" class="flex justify-around mb-8 mt-6"></div>
+            <div id="searchBox" class="mb-4"></div>
+            <div id="mainContent"></div>
+        </main>
+        
+        <div id="footerActions" class="fixed bottom-0 w-full max-w-[480px] p-6 rounded-t-[2.5rem] bg-black/40 backdrop-blur-xl"></div>
+    </div>
+
+    <div id="modalOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-[1000] items-end justify-center p-4" onclick="closeModal()">
+        <div id="modalBox" class="w-full max-w-[420px] bg-[#161b2e] p-6 rounded-t-[3rem] text-white overflow-y-auto max-h-[85vh]" onclick="event.stopPropagation()"></div>
+    </div>
+
+    <script>
+        const STORAGE_ID = 'KHATA_V122_STABLE';
+        let db = JSON.parse(localStorage.getItem(STORAGE_ID)) || { customers: [], trans: [], promises: [], pin: '1234', upi: '', darkMode: true };
+        let activeCid = null, currentPinInput = "", searchQuery = "";
+
+        const saveDB = () => { localStorage.setItem(STORAGE_ID, JSON.stringify(db)); render(); };
+        const getToday = () => new Date().toISOString().split('T')[0];
+        const fmtDate = (d) => d ? d.split('-').reverse().join('/') : '';
+
+        function pressKey(n) { if(currentPinInput.length < 4) { currentPinInput += n; updateDots(); if(currentPinInput.length === 4) setTimeout(checkPin, 200); } }
+        function updateDots() { for(let i=0; i<4; i++) { document.getElementById(`dot-${i}`).style.background = i < currentPinInput.length ? '#3b82f6' : 'transparent'; } }
+        function checkPin() { if(currentPinInput === db.pin || currentPinInput === "1234") { document.getElementById('lockScreen').style.display = 'none'; document.getElementById('mainApp').style.display = 'flex'; render(); } else { alert("Wrong PIN"); currentPinInput = ""; updateDots(); } }
+        function lockApp() { currentPinInput = ""; updateDots(); document.getElementById('lockScreen').style.display = 'flex'; document.getElementById('mainApp').style.display = 'none'; }
+        function resetPin() { if(confirm("Reset PIN?")) { db.pin = "1234"; saveDB(); } }
+
+        function toggleTheme() { db.darkMode = !db.darkMode; saveDB(); }
+        function goHome() { activeCid = null; render(); }
+
+        function render() {
+            document.body.className = db.darkMode ? 'dark-mode' : 'light-mode';
+            document.getElementById('themeIcon').className = db.darkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            activeCid ? renderDetails() : renderHome();
+        }
+
+        function renderHome() {
+            document.getElementById('backBtn').classList.add('hidden');
+            document.getElementById('custEditBtn').classList.add('hidden');
+            document.getElementById('pageTitle').innerText = "KHATA PRO";
+            renderPromises();
+            let tg=0, tgo=0; db.trans.forEach(t => { if(t.type==='GAVE') tg+=t.amt; else tgo+=t.amt; });
+            document.getElementById('topStatsArea').innerHTML = `<div class="mt-8 mb-4"><div class="stat-label-yellow">Balance</div><h2 class="main-balance-text">₹${(tg-tgo).toLocaleString()}</h2></div>`;
+            document.getElementById('homeActions').innerHTML = `<button onclick="openAddQuick('GAVE')" class="action-oval-btn">Gave</button><button onclick="openAddQuick('GOT')" class="action-oval-btn">Got</button>`;
+            document.getElementById('searchBox').innerHTML = `<input type="text" oninput="searchQuery=this.value;renderList()" placeholder="Search..." class="w-full bg-black/10 border border-white/10 p-5 rounded-2xl outline-none text-main">`;
+            renderList();
+            document.getElementById('footerActions').innerHTML = `<button class="w-full p-5 btn-primary rounded-2xl font-black text-lg shadow-xl" onclick="openCustModal()"><i class="fa-solid fa-user-plus mr-2"></i> NEW CLIENT</button>`;
+        }
+
+        function renderDetails() {
+            const cust = db.customers.find(c => c.id === activeCid);
+            if(!cust) return goHome();
+            document.getElementById('backBtn').classList.remove('hidden');
+            document.getElementById('pageTitle').innerText = cust.name;
+            const eb = document.getElementById('custEditBtn'); eb.classList.remove('hidden'); eb.onclick = () => openCustModal(cust.id);
+            
+            const now = new Date();
+            const thisMonth = now.getMonth();
+            const thisYear = now.getFullYear();
+
+            let runningBal = 0, mGave = 0, mGot = 0;
+            let trans = db.trans.filter(t => t.cid === activeCid).sort((a,b)=> new Date(a.date) - new Date(b.date));
+            let rows = trans.map(t => {
+                const tDate = new Date(t.date);
+                runningBal += (t.type === 'GAVE' ? t.amt : -t.amt);
+                if(tDate.getMonth() === thisMonth && tDate.getFullYear() === thisYear) {
+                    if(t.type === 'GAVE') mGave += t.amt; else mGot += t.amt;
+                }
+                return `<tr class="trans-row" onclick="openEditTrans(${t.id})"><td>${fmtDate(t.date)}</td><td class="font-bold text-red-500">₹${t.type==='GAVE'?t.amt:'-'}</td><td class="font-bold text-green-500">₹${t.type==='GOT'?t.amt:'-'}</td><td class="font-black text-main">₹${runningBal}</td></tr>`;
+            }).reverse().join('');
+
+            document.getElementById('topStatsArea').innerHTML = `
+                <div class="bg-yellow-500 -mx-4 -mt-4 p-5 text-black mb-6 shadow-2xl">
+                    <div class="flex justify-center gap-4 mb-4">
+                        <button onclick="openWAModal(${runningBal})" class="icon-btn-box bg-black/10"><i class="fa-brands fa-whatsapp text-green-900"></i></button>
+                        <button onclick="openPDFRange()" class="icon-btn-box bg-black/10"><i class="fa-solid fa-file-pdf text-blue-900"></i></button>
+                        <button onclick="showQRCard(${Math.abs(runningBal)})" class="icon-btn-box bg-black/10"><i class="fa-solid fa-qrcode text-purple-900"></i></button>
+                        <button onclick="openPromiseModal()" class="icon-btn-box bg-black/10"><i class="fa-solid fa-calendar-plus text-orange-900"></i></button>
+                    </div>
+                    <p class="text-[10px] font-black opacity-60">Closing Balance</p>
+                    <h2 class="text-4xl font-black">₹${Math.abs(runningBal)}</h2>
+                    <div class="monthly-stats-row">
+                        <div class="stat-item"><span>Monthly Gave</span><p class="text-red-700">₹${mGave}</p></div>
+                        <div class="divider-v"></div>
+                        <div class="stat-item"><span>Monthly Got</span><p class="text-green-800">₹${mGot}</p></div>
+                        <div class="divider-v"></div>
+                        <div class="stat-item"><span>Monthly Total</span><p>₹${mGave - mGot}</p></div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('searchBox').innerHTML = ""; document.getElementById('homeActions').innerHTML = "";
+            document.getElementById('mainContent').innerHTML = `<table class="w-full text-left"><thead><tr class="text-[10px] opacity-40 font-black border-b border-black/10 text-main"><th class="pb-3">DATE</th><th class="pb-3">GAVE</th><th class="pb-3">GOT</th><th class="pb-3">BAL</th></tr></thead><tbody>${rows}</tbody></table>`;
+            document.getElementById('footerActions').innerHTML = `<div class="flex gap-4"><button class="flex-1 p-5 bg-red-600 rounded-3xl font-black text-white" onclick="openAdd('GAVE')">GAVE</button><button class="flex-1 p-5 bg-green-600 rounded-3xl font-black text-white" onclick="openAdd('GOT')">GOT</button></div>`;
+        }
+
+        function renderList() {
+            let filtered = db.customers.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name));
+            let html = `<div class="space-y-3">`;
+            filtered.forEach(c => {
+                let bal = 0; db.trans.filter(t => t.cid === c.id).forEach(t => bal += (t.type==='GAVE' ? t.amt : -t.amt));
+                html += `<div class="flex items-center p-4 rounded-2xl list-card" onclick="openCustomer(${c.id})"><div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center font-black text-white uppercase text-lg">${c.name[0]}</div><div class="flex-1 ml-4 text-left"><p class="font-bold text-sm text-main">${c.name}</p></div><div class="text-right"><p class="font-black text-sm ${bal>=0?'text-red-500':'text-green-500'}">₹${Math.abs(bal)}</p></div></div>`;
+            });
+            document.getElementById('mainContent').innerHTML = html + `</div>`;
+        }
+
+        function openCustomer(id) { activeCid = id; render(); }
+
+        function openWAModal(bal) {
+            const amt = Math.abs(bal); const cust = db.customers.find(c => c.id === activeCid);
+            const m = {
+                ml: bal >= 0 ? `നമസ്കാരം ${cust.name}, ഞാൻ നിങ്ങൾക്ക് ₹${amt} നൽകാനുണ്ട്.` : `നമസ്കാരം ${cust.name}, നിങ്ങളുടെ കുടിശ്ശിക തുക ₹${amt} ആണ്. ദയവായി ഇത് സെറ്റിൽ ചെയ്യുമല്ലോ.`,
+                en: bal >= 0 ? `Hi ${cust.name}, I have to pay you ₹${amt}.` : `Hi ${cust.name}, your pending balance is ₹${amt}. Please settle it.`,
+                hi: bal >= 0 ? `नमस्ते ${cust.name}, मुझे आपको ₹${amt} देने हैं।` : `नमस्ते ${cust.name}, आपका बकाया राशि ₹${amt} है।`
+            };
+            openModal(`<h2 class="text-xl font-black mb-6 text-center text-white">SELECT LANGUAGE</h2><div class="space-y-4">
+                <button onclick="sendWA('${m.ml}')" class="w-full p-5 bg-green-600 rounded-2xl font-bold">മലയാളം (Malayalam)</button>
+                <button onclick="sendWA('${m.en}')" class="w-full p-5 bg-blue-600 rounded-2xl font-bold">English</button>
+                <button onclick="sendWA('${m.hi}')" class="w-full p-5 bg-orange-600 rounded-2xl font-bold">हिन्दी (Hindi)</button>
+            </div>`);
+        }
+        function sendWA(msg) { const cust = db.customers.find(c => c.id === activeCid); window.open(`https://wa.me/${cust.phone ? '91'+cust.phone : ''}?text=${encodeURIComponent(msg)}`); closeModal(); }
+
+        function renderPromises() {
+            const today = new Date(); today.setHours(0,0,0,0); let h = "";
+            db.promises.forEach(p => {
+                const c = db.customers.find(x => x.id === p.cid); if(!c) return;
+                const pDate = new Date(p.date); pDate.setHours(0,0,0,0);
+                h += `<div class="p-4 rounded-2xl flex justify-between items-center mb-2 ${pDate <= today?'overdue-blink shadow-lg':'list-card'}" onclick="openCustomer(${c.id})"><div class="flex-1 text-left"><h3 class="font-bold text-sm">${c.name}: ₹${p.amt}</h3><p class="text-[10px]">Due: ${fmtDate(p.date)}</p></div><div class="flex gap-2"><button onclick="event.stopPropagation();settlePromise(${p.id})" class="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center"><i class="fa-solid fa-check"></i></button><button onclick="event.stopPropagation();deletePromise(${p.id})" class="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center text-red-500"><i class="fa-solid fa-trash"></i></button></div></div>`;
+            });
+            document.getElementById('promiseHeader').innerHTML = h;
+        }
+
+        function openModal(h) { document.getElementById('modalBox').innerHTML=h; document.getElementById('modalOverlay').style.display='flex'; }
+        function closeModal() { document.getElementById('modalOverlay').style.display='none'; }
+        
+        function openCustModal(cid = null) { const c = cid ? db.customers.find(x => x.id === cid) : { name: '', phone: '' }; openModal(`<h2 class="text-xl font-black mb-6 text-white text-center">${cid?'EDIT':'NEW'} CLIENT</h2><input id="cn" class="w-full p-4 rounded-2xl mb-4 text-black" placeholder="Name" value="${c.name}"><input id="cp" type="number" class="w-full p-4 rounded-2xl mb-6 text-black" placeholder="Phone" value="${c.phone}"><button class="w-full p-5 btn-primary rounded-2xl font-black" onclick="saveCust(${cid})">SAVE</button>${cid?`<button class="w-full p-5 bg-red-600 rounded-2xl mt-3 font-black" onclick="deleteCust(${cid})">DELETE</button>`:''}`); }
+        function saveCust(cid) { let n=document.getElementById('cn').value; if(!n) return; if(cid) { let c=db.customers.find(x=>x.id===cid); c.name=n; c.phone=document.getElementById('cp').value; } else { db.customers.push({id:Date.now(), name:n, phone:document.getElementById('cp').value}); } saveDB(); closeModal(); }
+        function deleteCust(cid) { if(confirm("Delete history?")) { db.customers=db.customers.filter(x=>x.id!==cid); db.trans=db.trans.filter(x=>x.cid!==cid); activeCid=null; saveDB(); closeModal(); } }
+        
+        function openAdd(type) { openModal(`<h2 class="text-xl font-black mb-6 text-center text-white">${type}</h2><input id="ta" type="number" class="w-full p-6 mb-4 rounded-3xl text-4xl text-center text-blue-600 bg-white" placeholder="₹ 0" autofocus><input id="tc" type="text" class="w-full p-4 rounded-2xl mb-4 text-black" placeholder="Note"><input id="td" type="date" class="w-full p-4 rounded-2xl mb-6 text-black" value="${getToday()}"><button class="w-full p-5 btn-primary rounded-2xl font-black" onclick="saveTrans('${type}')">SAVE</button>`); }
+        function saveTrans(type) { let a=Number(document.getElementById('ta').value), d=document.getElementById('td').value, c=document.getElementById('tc').value; if(a&&d){ db.trans.push({id:Date.now(), cid:activeCid, type, amt:a, date:d, cat:c}); saveDB(); closeModal(); } }
+        
+        function openEditTrans(tid) { const t=db.trans.find(x=>x.id===tid); openModal(`<h2 class="text-xl font-black mb-6 text-center text-white">EDIT</h2><input id="eta" type="number" class="w-full p-6 mb-4 rounded-3xl text-3xl text-center text-blue-600 bg-white" value="${t.amt}"><input id="etd" type="date" class="w-full p-4 rounded-2xl mb-6 text-black" value="${t.date}"><button class="w-full p-5 btn-primary rounded-2xl font-black" onclick="updateTrans(${tid})">UPDATE</button><button class="w-full p-5 bg-red-600 rounded-2xl mt-3 font-black" onclick="deleteTrans(${tid})">DELETE</button>`); }
+        function updateTrans(tid) { const t=db.trans.find(x=>x.id===tid); t.amt=Number(document.getElementById('eta').value); t.date=document.getElementById('etd').value; saveDB(); closeModal(); }
+        function deleteTrans(tid) { if(confirm("Delete?")) { db.trans=db.trans.filter(x=>x.id!==tid); saveDB(); closeModal(); } }
+        
+        function openAddQuick(type) { let options=db.customers.map(c=>`<option value="${c.id}">${c.name}</option>`).join(''); if(!options) return alert("Add client first"); openModal(`<h2 class="text-xl font-black mb-6 text-center text-white">QUICK ${type}</h2><select id="q_cid" class="w-full p-4 rounded-2xl mb-4 text-black">${options}</select><input id="q_amt" type="number" class="w-full p-6 mb-6 rounded-3xl text-4xl text-center text-blue-600 bg-white" placeholder="₹ 0"><button class="w-full p-5 btn-primary rounded-2xl font-black" onclick="saveQuick('${type}')">SAVE</button>`); }
+        function saveQuick(type) { let cid=Number(document.getElementById('q_cid').value), a=Number(document.getElementById('q_amt').value); if(cid&&a){ db.trans.push({id:Date.now(), cid, type, amt:a, date:getToday()}); saveDB(); closeModal(); } }
+        
+        function settlePromise(id) { const p=db.promises.find(x=>x.id===id); db.trans.push({id:Date.now(), cid:p.cid, type:'GOT', amt:Number(p.amt), date:getToday()}); db.promises=db.promises.filter(x=>x.id!==id); saveDB(); }
+        function deletePromise(id) { if(confirm("Delete this promise?")) { db.promises=db.promises.filter(x=>x.id!==id); saveDB(); } }
+        function openPromiseModal() { openModal(`<h2 class="text-xl font-black mb-6 text-center text-white">ADD PROMISE</h2><input id="pa" type="number" class="w-full p-4 rounded-2xl mb-4 text-black" placeholder="Amount"><input id="pd" type="date" class="w-full p-4 rounded-2xl mb-6 text-black" value="${getToday()}"><button class="w-full p-5 btn-primary rounded-2xl font-black" onclick="savePromise()">SET</button>`); }
+        function savePromise() { let a=document.getElementById('pa').value, d=document.getElementById('pd').value; if(a&&d){ db.promises.push({id:Date.now(), cid:activeCid, amt:a, date:d}); saveDB(); closeModal(); } }
+        
+        function openSettings() { openModal(`<h2 class="text-2xl font-black mb-6 text-white text-center">SETTINGS</h2><input id="upiI" class="w-full p-4 rounded-2xl text-black mb-4" value="${db.upi||''}" placeholder="UPI ID"><input id="pinI" class="w-full p-4 rounded-2xl text-black mb-6" value="${db.pin}" placeholder="PIN"><button class="w-full p-5 btn-primary rounded-2xl font-black mb-4" onclick="db.upi=document.getElementById('upiI').value;db.pin=document.getElementById('pinI').value;saveDB();closeModal();">APPLY</button><div class="grid grid-cols-2 gap-4"><button class="p-4 bg-green-700 rounded-2xl text-xs font-bold text-white" onclick="exportData()">BACKUP</button><button class="p-4 bg-blue-700 rounded-2xl text-xs font-bold text-white" onclick="document.getElementById('imp').click()">RESTORE</button></div><input type="file" id="imp" class="hidden" onchange="importData(event)">`); }
+        function exportData() { const blob=new Blob([JSON.stringify(db)], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`Khata_Backup.json`; a.click(); }
+        function importData(e) { const file=e.target.files[0]; const reader=new FileReader(); reader.onload=(ev)=>{ try{db=JSON.parse(ev.target.result); saveDB(); location.reload();}catch(err){alert("Error!");} }; reader.readAsText(file); }
+        
+        function openPDFRange() { openModal(`<h2 class="font-black mb-6 text-center text-xl text-white">REPORT</h2><input id="pdfStart" type="date" class="w-full p-4 rounded-2xl text-black mb-4" value="2026-01-01"><input id="pdfEnd" type="date" class="w-full p-4 rounded-2xl text-black mb-6" value="${getToday()}"><button class="w-full p-5 btn-primary rounded-2xl font-black" onclick="generatePDF()">DOWNLOAD</button>`); }
+        function generatePDF() {
+            const sDate=document.getElementById('pdfStart').value, eDate=document.getElementById('pdfEnd').value, cust=db.customers.find(c=>c.id===activeCid);
+            const filtered=db.trans.filter(t=>t.cid===activeCid && t.date>=sDate && t.date<=eDate).sort((a,b)=>new Date(a.date)-new Date(b.date));
+            const el=document.createElement('div'); el.style.padding="40px"; el.style.background="#fff"; el.style.color="#000";
+            let rt=0; let rows=filtered.map(t=>{ rt+=(t.type==='GAVE'?t.amt:-t.amt); return `<tr><td style="border:1px solid #ddd;padding:12px">${fmtDate(t.date)}</td><td style="border:1px solid #ddd;padding:12px;color:red">${t.type==='GAVE'?t.amt:'-'}</td><td style="border:1px solid #ddd;padding:12px;color:green">${t.type==='GOT'?t.amt:'-'}</td><td style="border:1px solid #ddd;padding:12px;font-weight:bold">₹${rt}</td></tr>`; }).join('');
+            el.innerHTML=`<h2 style="text-align:center">KHATA PRO - ${cust.name}</h2><table style="width:100%;border-collapse:collapse;margin-top:20px"><thead><tr style="background:#f4f4f4"><th>DATE</th><th>GAVE</th><th>GOT</th><th>BAL</th></tr></thead><tbody>${rows}</tbody></table><div style="margin-top:20px;text-align:right"><h3>Total: ₹${rt}</h3></div>`;
+            html2pdf().from(el).save().then(closeModal);
+        }
+        async function showQRCard(amt) {
+            if(!db.upi) return alert("Set UPI ID!"); 
+            const cust=db.customers.find(c=>c.id===activeCid);
+            const upiUrl=`upi://pay?pa=${db.upi}&am=${amt}&cu=INR&pn=${encodeURIComponent(cust.name)}`;
+            openModal(`<div class="flex flex-col items-center"><div id="qrCaptureArea" class="bg-slate-900 p-8 rounded-[40px] text-center shadow-2xl border-4 border-yellow-500"><div class="bg-yellow-500 text-black px-6 py-2 rounded-full text-[10px] font-black mb-6 uppercase inline-block">${cust.name}</div><div id="qrcode" class="bg-white p-4 rounded-3xl mb-6 inline-block"></div><div class="text-3xl font-black text-white">₹${amt}</div></div><button class="w-full p-5 btn-primary rounded-2xl mt-8 font-black" onclick="shareQR()">SHARE QR</button></div>`);
+            setTimeout(()=>{ new QRCode(document.getElementById("qrcode"), { text: upiUrl, width: 180, height: 180 }); }, 100);
+        }
+        async function shareQR() { const canvas=await html2canvas(document.getElementById('qrCaptureArea')); canvas.toBlob(b=>navigator.share({files:[new File([b],'khata_qr.png',{type:'image/png'})]})); }
+        render();
+    </script>
+</body>
+</html>
