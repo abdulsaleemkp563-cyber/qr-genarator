@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KHATA PRO | v250 FULL</title>
+    <title>KHATA PRO | v260 FULL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -29,8 +29,8 @@
         .trans-row td { padding: 14px 8px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; vertical-align: top; }
         .mode-text { font-size: 10px; font-weight: 800; text-transform: uppercase; display: block; margin-top: 4px; color: #facc15; }
         .remarks-text { font-size: 11px; opacity: 0.7; display: block; margin-top: 4px; color: #facc15; font-weight: 600; }
-        .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; }
         .promise-badge { background: #ef4444; color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-top: 2px; display: inline-block; }
+        .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; }
     </style>
 </head>
 <body class="dark-mode">
@@ -79,7 +79,7 @@
     </div>
 
     <script>
-        const STORAGE_ID = 'KHATA_V250_STABLE';
+        const STORAGE_ID = 'KHATA_V260_FINAL';
         let db = JSON.parse(localStorage.getItem(STORAGE_ID)) || { customers: [], trans: [], pin: '1234', upi: '', darkMode: true };
         let activeCid = null, currentPinInput = "", searchQuery = "";
 
@@ -87,12 +87,12 @@
         const getToday = () => new Date().toISOString().split('T')[0];
         const fmtDate = (d) => d ? d.split('-').reverse().join('/') : '';
 
-        // LOCK SYSTEM
+        // --- LOCK SYSTEM ---
         function pressKey(n) { if(currentPinInput.length < 4) { currentPinInput += n; updateDots(); if(currentPinInput.length === 4) setTimeout(checkPin, 200); } }
         function updateDots() { for(let i=0; i<4; i++) document.getElementById(`dot-${i}`).style.background = i < currentPinInput.length ? '#3b82f6' : 'transparent'; }
         function checkPin() { if(currentPinInput === db.pin || currentPinInput === "1234") { document.getElementById('lockScreen').style.display = 'none'; document.getElementById('mainApp').style.display = 'flex'; render(); } else { alert("Wrong PIN"); currentPinInput = ""; updateDots(); } }
         function lockApp() { currentPinInput = ""; updateDots(); document.getElementById('lockScreen').style.display = 'flex'; document.getElementById('mainApp').style.display = 'none'; }
-        function resetPin() { if(confirm("Reset PIN?")) { db.pin = "1234"; saveDB(); } }
+        function resetPin() { if(confirm("Reset PIN to 1234?")) { db.pin = "1234"; saveDB(); } }
         function toggleTheme() { db.darkMode = !db.darkMode; saveDB(); }
 
         function render() { 
@@ -177,7 +177,7 @@
         function openCustomer(id) { activeCid = id; render(); }
         function goHome() { activeCid = null; render(); }
 
-        // --- NEW FEATURES INCORPORATED ---
+        // --- TRANSACTION FUNCTIONS ---
         function openAdd(type) {
             openModal(`
                 <h2 class="text-xl font-black mb-6 text-center text-white">${type}</h2>
@@ -186,10 +186,10 @@
                     <button id="mCash" onclick="setM('CASH')" class="flex-1 p-3 rounded-xl border-2 font-bold">CASH</button>
                     <button id="mUpi" onclick="setM('UPI')" class="flex-1 p-3 rounded-xl border-2 font-bold">UPI</button>
                 </div>
-                <input id="tr" type="text" class="w-full p-4 rounded-2xl mb-4 text-black" placeholder="Remarks (എന്തിനാണ്?)">
+                <input id="tr" type="text" class="w-full p-4 rounded-2xl mb-4 text-black" placeholder="എന്തിനാണ്? (Remarks)">
                 <div class="text-xs mb-1 opacity-50">Date</div>
                 <input id="td" type="date" class="w-full p-4 rounded-2xl mb-4 text-black" value="${getToday()}">
-                <div class="text-xs mb-1 opacity-50 text-red-400 font-bold">Promise Date (optional)</div>
+                <div class="text-xs mb-1 opacity-50 text-red-400 font-bold underline">Promise Date (Optional)</div>
                 <input id="tp" type="date" class="w-full p-4 rounded-2xl mb-6 text-black">
                 <input type="hidden" id="tm" value="CASH">
                 <button class="w-full p-5 btn-primary rounded-2xl font-black" onclick="saveTrans('${type}')">SAVE</button>
@@ -222,31 +222,32 @@
         function updateTrans(tid) { const t=db.trans.find(x=>x.id===tid); t.amt=Number(document.getElementById('eta').value); t.rem=document.getElementById('etr').value; t.date=document.getElementById('etd').value; saveDB(); closeModal(); }
         function deleteTrans(tid) { if(confirm("Delete?")) { db.trans=db.trans.filter(x=>x.id!==tid); saveDB(); closeModal(); } }
 
+        // --- CUSTOMER FUNCTIONS ---
         function openCustModal(cid=null) {
             const c = cid ? db.customers.find(x=>x.id===cid) : {name:'', phone:''};
             openModal(`
                 <h2 class="text-xl font-black mb-6 text-center text-white">${cid?'EDIT':'NEW'} CLIENT</h2>
                 <input id="cn" class="w-full p-4 rounded-2xl mb-4 text-black" placeholder="Name" value="${c.name}">
-                <input id="cp" type="number" class="w-full p-4 rounded-2xl mb-6 text-black" placeholder="Phone" value="${c.phone}">
+                <input id="cp" type="number" class="w-full p-4 rounded-2xl mb-6 text-black" placeholder="Phone Number" value="${c.phone}">
                 <button class="w-full p-5 btn-primary rounded-2xl font-black" onclick="saveCust(${cid})">SAVE</button>
-                ${cid ? `<button class="w-full p-4 bg-red-700 rounded-2xl mt-4 font-black text-white text-xs" onclick="deleteFullCust(${cid})">DELETE ALL DATA</button>` : ''}
+                ${cid ? `<button class="w-full p-4 bg-red-700 rounded-2xl mt-4 font-black text-white text-xs" onclick="deleteFullCust(${cid})">DELETE FULL CUSTOMER HISTORY</button>` : ''}
             `);
         }
         function deleteFullCust(cid) { if(confirm("ഈ കസ്റ്റമറുടെ എല്ലാ ഹിസ്റ്ററിയും ഡിലീറ്റ് ചെയ്യണോ?")) { db.customers = db.customers.filter(x => x.id !== cid); db.trans = db.trans.filter(x => x.cid !== cid); activeCid = null; saveDB(); closeModal(); } }
         function saveCust(cid) { let n=document.getElementById('cn').value; if(n){ if(cid){ let c=db.customers.find(x=>x.id===cid); c.name=n; c.phone=document.getElementById('cp').value; }else{ db.customers.push({id:Date.now(), name:n, phone:document.getElementById('cp').value}); } saveDB(); closeModal(); } }
 
-        // --- WHATSAPP, QR, PDF ---
-        function shareWA(p, b) { if(!p) return alert("No Phone Number"); window.open(`https://wa.me/91${p}?text=Dear Customer, your balance is ₹${Math.abs(b)}. Please settle it soon.`); }
-        function openQR(amt) { if(!db.upi) return alert("Set UPI ID in Settings"); openModal(`<div class="bg-white p-6 rounded-3xl flex flex-col items-center"><div id="qr"></div><p class="text-black font-black mt-4 text-2xl">₹${amt}</p></div>`); new QRCode(document.getElementById("qr"), `upi://pay?pa=${db.upi}&am=${amt}&cu=INR`); }
-        function openPDFModal() { openModal(`<h2 class="mb-4 font-bold">Download Report</h2><input id="pdfStart" type="date" class="w-full p-4 rounded-xl text-black mb-2" value="${getToday()}"><input id="pdfEnd" type="date" class="w-full p-4 rounded-xl text-black mb-4" value="${getToday()}"><button class="w-full p-5 btn-primary rounded-2xl font-black" onclick="generatePDF()">DOWNLOAD</button>`); }
+        // --- SHARE & TOOLS ---
+        function shareWA(p, b) { if(!p) return alert("Phone Number ഇല്ല"); window.open(`https://wa.me/91${p}?text=Dear Customer, your balance is ₹${Math.abs(b)}. Please settle it soon.`); }
+        function openQR(amt) { if(!db.upi) return alert("Settings-ൽ UPI ID ചേർക്കുക"); openModal(`<div class="bg-white p-6 rounded-3xl flex flex-col items-center"><div id="qr"></div><p class="text-black font-black mt-4 text-2xl">₹${amt}</p></div>`); new QRCode(document.getElementById("qr"), `upi://pay?pa=${db.upi}&am=${amt}&cu=INR`); }
+        function openPDFModal() { openModal(`<h2 class="mb-4 font-bold">Download Report</h2><input id="pdfStart" type="date" class="w-full p-4 rounded-xl text-black mb-2" value="${getToday()}"><input id="pdfEnd" type="date" class="w-full p-4 rounded-xl text-black mb-4" value="${getToday()}"><button class="w-full p-5 btn-primary rounded-2xl font-black" onclick="generatePDF()">DOWNLOAD PDF</button>`); }
         
         function generatePDF() {
             const s=document.getElementById('pdfStart').value, e=document.getElementById('pdfEnd').value, cust=db.customers.find(c=>c.id===activeCid);
             const filtered=db.trans.filter(t=>t.cid===activeCid && t.date>=s && t.date<=e).sort((a,b)=>new Date(a.date)-new Date(b.date));
-            const el=document.createElement('div'); el.style.padding="20px";
+            const el=document.createElement('div'); el.style.padding="40px"; el.style.background="#fff"; el.style.color="#000";
             let rt=0;
-            let rows=filtered.map(t=>{ rt+=(t.type==='GAVE'?t.amt:-t.amt); return `<tr><td style="border:1px solid #ddd;padding:8px">${fmtDate(t.date)}</td><td style="border:1px solid #ddd;padding:8px">${t.type==='GAVE'?t.amt:'-'}</td><td style="border:1px solid #ddd;padding:8px">${t.type==='GOT'?t.amt:'-'}</td><td style="border:1px solid #ddd;padding:8px">₹${rt}</td></tr>`; }).join('');
-            el.innerHTML=`<h2 style="text-align:center">Statement: ${cust.name}</h2><table style="width:100%;border-collapse:collapse;margin-top:20px"><thead><tr style="background:#eee"><th>Date</th><th>Gave</th><th>Got</th><th>Balance</th></tr></thead><tbody>${rows}</tbody></table>`;
+            let rows=filtered.map(t=>{ rt+=(t.type==='GAVE'?t.amt:-t.amt); return `<tr><td style="border:1px solid #ddd;padding:12px">${fmtDate(t.date)}</td><td style="border:1px solid #ddd;padding:12px;color:red">${t.type==='GAVE'?t.amt:'-'}</td><td style="border:1px solid #ddd;padding:12px;color:green">${t.type==='GOT'?t.amt:'-'}</td><td style="border:1px solid #ddd;padding:12px;font-weight:bold">₹${rt}</td></tr>`; }).join('');
+            el.innerHTML=`<h2 style="text-align:center">KHATA PRO - ${cust.name}</h2><table style="width:100%;border-collapse:collapse;margin-top:20px"><thead><tr style="background:#eee"><th>Date</th><th>Gave</th><th>Got</th><th>Balance</th></tr></thead><tbody>${rows}</tbody></table>`;
             html2pdf().from(el).save(`${cust.name}_Khata.pdf`);
         }
 
@@ -254,8 +255,8 @@
             openModal(`
                 <h2 class="text-2xl font-black mb-6 text-center text-white">SETTINGS</h2>
                 <input id="upiI" class="w-full p-4 rounded-2xl text-black mb-4" value="${db.upi||''}" placeholder="UPI ID (for QR)">
-                <input id="pinI" class="w-full p-4 rounded-2xl text-black mb-6" value="${db.pin}" placeholder="PIN">
-                <button class="w-full p-5 btn-primary rounded-2xl font-black mb-4" onclick="db.upi=document.getElementById('upiI').value;db.pin=document.getElementById('pinI').value;saveDB();closeModal();">APPLY</button>
+                <input id="pinI" class="w-full p-4 rounded-2xl text-black mb-6" value="${db.pin}" placeholder="Set App PIN">
+                <button class="w-full p-5 btn-primary rounded-2xl font-black mb-4" onclick="db.upi=document.getElementById('upiI').value;db.pin=document.getElementById('pinI').value;saveDB();alert('Saved!');closeModal();">APPLY CHANGES</button>
                 <div class="grid grid-cols-2 gap-4">
                     <button class="p-4 bg-green-700 rounded-2xl text-xs font-bold text-white" onclick="exportData()">BACKUP</button>
                     <button class="p-4 bg-blue-700 rounded-2xl text-xs font-bold text-white" onclick="document.getElementById('imp').click()">RESTORE</button>
@@ -273,7 +274,7 @@
 
         function openAddQuick(type) { 
             let options = db.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-            if(!options) return alert("Add client first");
+            if(!options) return alert("ആദ്യം കസ്റ്റമറെ ചേർക്കുക");
             openModal(`<h2 class="text-xl font-black mb-6 text-center text-white">QUICK ${type}</h2><select id="q_cid" class="w-full p-4 rounded-2xl mb-4 text-black">${options}</select><input id="q_amt" type="number" class="w-full p-6 mb-6 rounded-3xl text-4xl text-center text-blue-600 bg-white" placeholder="₹ 0"><button class="w-full p-5 btn-primary rounded-2xl font-black" onclick="saveQuick('${type}')">SAVE</button>`);
         }
         function saveQuick(type) { let cid=Number(document.getElementById('q_cid').value), a=Number(document.getElementById('q_amt').value); if(cid&&a){ db.trans.push({id:Date.now(), cid, type, amt:a, date:getToday(), mode:'CASH'}); saveDB(); closeModal(); } }
