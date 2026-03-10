@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KHATA PRO | FULL v350</title>
+    <title>KHATA PRO | v360</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -21,16 +21,19 @@
         .action-oval-btn { background-color: #b58916; color: black; padding: 14px 45px; border-radius: 50px; font-weight: 800; font-size: 22px; border: none; }
         
         .feature-icon-btn { background: rgba(0,0,0,0.1); width: 50px; height: 50px; border-radius: 15px; display: flex; align-items: center; justify-content: center; border: none; }
-        .monthly-card-row { background: rgba(0,0,0,0.1); border-radius: 2rem; padding: 20px 10px; display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+        .monthly-card-row { background: rgba(0,0,0,0.1); border-radius: 1.5rem; padding: 15px 5px; display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
         .monthly-item { flex: 1; text-align: center; border-right: 1px solid rgba(0,0,0,0.1); }
         .monthly-item:last-child { border-right: none; }
         
-        .trans-row td { padding: 14px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .mode-label { font-size: 9px; font-weight: 800; background: rgba(0,0,0,0.2); padding: 2px 5px; border-radius: 4px; display: inline-block; margin-top: 2px; }
-        .remarks-text { font-size: 11px; color: #facc15; font-weight: 600; display: block; margin-top: 2px; }
+        .trans-row td { padding: 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px; }
+        .mode-tag { font-size: 8px; font-weight: 800; padding: 2px 4px; border-radius: 4px; display: block; margin-top: 2px; width: fit-content; }
+        .mode-cash { background: #15803d; color: white; }
+        .mode-upi { background: #1d4ed8; color: white; }
         
         .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; }
-        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 24px; opacity: 0.6; }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 28px; color: white; opacity: 0.8; font-weight: bold; }
+        .overdue-blink { border: 2px solid #ef4444; animation: blink 1.5s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
     </style>
 </head>
 <body class="dark-mode">
@@ -69,6 +72,7 @@
         </header>
 
         <main class="flex-1 overflow-y-auto p-4 pb-40">
+            <div id="promiseHeader" class="mb-4 space-y-2"></div>
             <div id="topStatsArea" class="text-center"></div>
             <div id="homeActions" class="flex justify-around mb-8 mt-6"></div>
             <div id="searchBox" class="mb-4"></div>
@@ -79,8 +83,8 @@
     </div>
 
     <script>
-        const STORAGE_ID = 'KHATA_V350_FINAL';
-        let db = JSON.parse(localStorage.getItem(STORAGE_ID)) || { customers: [], trans: [], pin: '1234', upi: '', darkMode: true };
+        const STORAGE_ID = 'KHATA_V360_FINAL';
+        let db = JSON.parse(localStorage.getItem(STORAGE_ID)) || { customers: [], trans: [], promises: [], pin: '1234', upi: '', darkMode: true };
         let activeCid = null, currentPinInput = "", searchQuery = "";
 
         const saveDB = () => { localStorage.setItem(STORAGE_ID, JSON.stringify(db)); render(); };
@@ -104,12 +108,30 @@
             document.getElementById('backBtn').classList.add('hidden');
             document.getElementById('custEditBtn').classList.add('hidden');
             document.getElementById('pageTitle').innerText = "KHATA PRO";
+            renderPromises();
             let tg=0, tgo=0; db.trans.forEach(t => { if(t.type==='GAVE') tg+=t.amt; else tgo+=t.amt; });
             document.getElementById('topStatsArea').innerHTML = `<div class="mt-8 mb-4"><div class="stat-label-yellow">Net Balance</div><h2 class="main-balance-text">₹${(tg-tgo).toLocaleString()}</h2></div>`;
             document.getElementById('homeActions').innerHTML = `<button onclick="openAddQuick('GAVE')" class="action-oval-btn">Gave</button><button onclick="openAddQuick('GOT')" class="action-oval-btn">Got</button>`;
             document.getElementById('searchBox').innerHTML = `<input type="text" oninput="searchQuery=this.value;renderList()" placeholder="Search clients..." class="w-full bg-black/10 border border-white/10 p-5 rounded-2xl outline-none">`;
             renderList();
             document.getElementById('footerActions').innerHTML = `<button class="w-full p-5 btn-primary rounded-2xl font-black text-lg" onclick="openCustModal()"><i class="fa-solid fa-user-plus mr-2"></i> NEW CLIENT</button>`;
+        }
+
+        function renderPromises() {
+            const today = new Date(); today.setHours(0,0,0,0); let h = "";
+            db.promises.forEach(p => {
+                const c = db.customers.find(x => x.id === p.cid); if(!c) return;
+                const pDate = new Date(p.date); pDate.setHours(0,0,0,0);
+                h += `<div class="p-4 rounded-2xl flex justify-between items-center mb-2 bg-white/5 border border-white/10 ${pDate <= today?'overdue-blink shadow-lg':''}" onclick="openCustomer(${c.id})"><div class="flex-1 text-left"><h3 class="font-bold text-sm">${c.name}: ₹${p.amt}</h3><p class="text-[10px]">Due: ${fmtDate(p.date)}</p></div><button onclick="event.stopPropagation();settlePromise(${p.id})" class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center"><i class="fa-solid fa-check text-white"></i></button></div>`;
+            });
+            document.getElementById('promiseHeader').innerHTML = h;
+        }
+
+        function settlePromise(id) { 
+            const p = db.promises.find(x => x.id === id); 
+            db.trans.push({id:Date.now(), cid:p.cid, type:'GOT', amt:Number(p.amt), date:getToday(), mode:'CASH', rem:'Promise Settled'}); 
+            db.promises = db.promises.filter(x => x.id !== id); 
+            saveDB(); 
         }
 
         function renderDetails() {
@@ -119,6 +141,7 @@
             document.getElementById('pageTitle').innerText = cust.name;
             document.getElementById('custEditBtn').classList.remove('hidden');
             document.getElementById('custEditBtn').onclick = () => openCustModal(cust.id);
+            document.getElementById('promiseHeader').innerHTML = "";
             
             let rb = 0, mGave = 0, mGot = 0;
             const now = new Date();
@@ -130,14 +153,14 @@
                     if(t.type === 'GAVE') mGave += t.amt; else mGot += t.amt;
                 }
                 rb += (t.type === 'GAVE' ? t.amt : -t.amt);
-                const remarkHtml = t.rem ? `<span class="remarks-text">${t.rem}</span>` : '';
-                const modeHtml = `<span class="mode-label">${t.mode || 'CASH'}</span>`;
+                const mTag = `<span class="mode-tag ${t.mode==='UPI'?'mode-upi':'mode-cash'}">${t.mode || 'CASH'}</span>`;
 
                 return `<tr class="trans-row" onclick="openEditTrans(${t.id})">
-                    <td><div class="text-[12px] opacity-60">${fmtDate(t.date)}</div>${remarkHtml}</td>
-                    <td class="text-red-500 font-bold">₹${t.type==='GAVE'?t.amt:'-'}${t.type==='GAVE'?modeHtml:''}</td>
-                    <td class="text-green-500 font-bold">₹${t.type==='GOT'?t.amt:'-'}${t.type==='GOT'?modeHtml:''}</td>
-                    <td class="font-black text-[13px]">₹${rb}</td>
+                    <td class="opacity-60">${fmtDate(t.date)}</td>
+                    <td class="text-yellow-500 font-medium">${t.rem || '-'}</td>
+                    <td class="text-red-500 font-bold">₹${t.type==='GAVE'?t.amt:'-'}${t.type==='GAVE'?mTag:''}</td>
+                    <td class="text-green-500 font-bold">₹${t.type==='GOT'?t.amt:'-'}${t.type==='GOT'?mTag:''}</td>
+                    <td class="font-black">₹${rb}</td>
                 </tr>`;
             }).reverse().join('');
 
@@ -147,6 +170,7 @@
                         <button onclick="shareWA('${cust.phone}', ${rb})" class="feature-icon-btn"><i class="fa-brands fa-whatsapp text-2xl text-green-800"></i></button>
                         <button onclick="openQR(${Math.abs(rb)})" class="feature-icon-btn"><i class="fa-solid fa-qrcode text-2xl text-purple-800"></i></button>
                         <button onclick="openPDFModal()" class="feature-icon-btn"><i class="fa-solid fa-file-pdf text-2xl text-blue-800"></i></button>
+                        <button onclick="openPromiseModal()" class="feature-icon-btn"><i class="fa-solid fa-calendar-plus text-2xl text-orange-900"></i></button>
                     </div>
                     <p class="text-[11px] font-black opacity-60 uppercase mb-1">Total Balance</p>
                     <h2 class="text-5xl font-black mb-4">₹${Math.abs(rb)}</h2>
@@ -157,7 +181,7 @@
                     </div>
                 </div>`;
 
-            document.getElementById('mainContent').innerHTML = `<div class="mt-4"><table class="w-full text-left"><thead><tr class="text-[10px] opacity-40 font-black border-b border-white/10"><th>DATE / REMARKS</th><th>GAVE</th><th>GOT</th><th>BAL</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+            document.getElementById('mainContent').innerHTML = `<div class="mt-4 overflow-x-auto"><table class="w-full text-left"><thead><tr class="text-[10px] opacity-40 font-black border-b border-white/10"><th>DATE</th><th>REMARKS</th><th>GAVE</th><th>GOT</th><th>BAL</th></tr></thead><tbody>${rows}</tbody></table></div>`;
             document.getElementById('footerActions').innerHTML = `<div class="flex gap-4"><button class="flex-1 p-5 bg-red-600 rounded-3xl font-black text-white" onclick="openAdd('GAVE')">GAVE</button><button class="flex-1 p-5 bg-green-600 rounded-3xl font-black text-white" onclick="openAdd('GOT')">GOT</button></div>`;
         }
 
@@ -171,7 +195,6 @@
             document.getElementById('mainContent').innerHTML = html + `</div>`;
         }
 
-        // --- CORE FUNCTIONS ---
         function openAdd(type) {
             openModal(`
                 <button class="close-btn" onclick="closeModal()">&times;</button>
@@ -181,7 +204,7 @@
                     <button id="mCash" onclick="setM('CASH')" class="flex-1 p-3 rounded-xl border-2 font-bold">CASH</button>
                     <button id="mUpi" onclick="setM('UPI')" class="flex-1 p-3 rounded-xl border-2 font-bold">UPI</button>
                 </div>
-                <input id="tr" type="text" class="w-full p-4 rounded-2xl mb-4 text-black" placeholder="എന്തിനാണ്? (Remarks)">
+                <input id="tr" type="text" class="w-full p-4 rounded-2xl mb-4 text-black" placeholder="Remarks (എന്തിനാണ്?)">
                 <input id="td" type="date" class="w-full p-4 rounded-2xl mb-6 text-black" value="${getToday()}">
                 <input type="hidden" id="tm" value="CASH">
                 <button class="w-full p-5 btn-primary rounded-2xl font-black" onclick="saveTrans('${type}')">SAVE TRANSACTION</button>
@@ -208,7 +231,7 @@
                     <div id="qr"></div>
                     <p class="text-black font-black mt-4 text-2xl">₹${amt}</p>
                     <p class="text-gray-500 text-[10px] mt-1">${db.upi}</p>
-                    <button onclick="shareLink(${amt})" class="mt-4 w-full p-3 bg-blue-100 text-blue-700 rounded-xl font-bold text-sm"><i class="fa-solid fa-share-nodes mr-2"></i> SHARE QR LINK</button>
+                    <button onclick="shareLink(${amt})" class="mt-4 w-full p-3 bg-blue-100 text-blue-700 rounded-xl font-bold text-sm"><i class="fa-solid fa-share-nodes mr-2"></i> SHARE LINK</button>
                 </div>
             `);
             new QRCode(document.getElementById("qr"), { text: `upi://pay?pa=${db.upi}&am=${amt}&cu=INR`, width: 200, height: 200 });
@@ -217,28 +240,39 @@
         function shareLink(amt) {
             const link = `upi://pay?pa=${db.upi}&am=${amt}&cu=INR`;
             if (navigator.share) {
-                navigator.share({ title: 'Payment Link', text: `Pay ₹${amt} using this link:`, url: link });
+                navigator.share({ title: 'Payment Link', text: `Pay ₹${amt}:`, url: link });
             } else {
-                alert("Link Copied: " + link);
+                alert("Link: " + link);
             }
         }
 
         function shareWA(p, b) {
             if(!p) return alert("Phone Number ഇല്ല");
-            const msg = `നമസ്കാരം, നിങ്ങളുടെ KHATA PRO ബാലൻസ് ₹${Math.abs(b)} ആണ്. വേഗത്തിൽ തീർപ്പാക്കുമല്ലോ.`;
+            const msg = `ബാലൻസ്: ₹${Math.abs(b)}. വേഗത്തിൽ തീർപ്പാക്കുമല്ലോ.`;
             window.open(`https://wa.me/91${p}?text=${encodeURIComponent(msg)}`);
         }
+
+        function openPromiseModal() {
+            openModal(`
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+                <h2 class="text-xl font-black mb-6 text-center text-white">ADD PROMISE</h2>
+                <input id="pa" type="number" class="w-full p-4 rounded-2xl mb-4 text-black" placeholder="Amount">
+                <input id="pd" type="date" class="w-full p-4 rounded-2xl mb-6 text-black" value="${getToday()}">
+                <button class="w-full p-5 btn-primary rounded-2xl font-black" onclick="savePromise()">SET PROMISE</button>
+            `);
+        }
+        function savePromise() { let a=document.getElementById('pa').value, d=document.getElementById('pd').value; if(a&&d){ db.promises.push({id:Date.now(), cid:activeCid, amt:a, date:d}); saveDB(); closeModal(); } }
 
         function openSettings() {
             openModal(`
                 <button class="close-btn" onclick="closeModal()">&times;</button>
                 <h2 class="text-2xl font-black mb-6 text-center text-white">SETTINGS</h2>
-                <input id="upiI" class="w-full p-4 rounded-2xl text-black mb-4" value="${db.upi||''}" placeholder="UPI ID (example@upi)">
-                <input id="pinI" class="w-full p-4 rounded-2xl text-black mb-6" value="${db.pin}" placeholder="Set PIN">
-                <button class="w-full p-5 btn-primary rounded-2xl font-black mb-8" onclick="db.upi=document.getElementById('upiI').value;db.pin=document.getElementById('pinI').value;saveDB();alert('Saved!');closeModal();">APPLY CHANGES</button>
+                <input id="upiI" class="w-full p-4 rounded-2xl text-black mb-4" value="${db.upi||''}" placeholder="UPI ID">
+                <input id="pinI" class="w-full p-4 rounded-2xl text-black mb-6" value="${db.pin}" placeholder="PIN">
+                <button class="w-full p-5 btn-primary rounded-2xl font-black mb-8" onclick="db.upi=document.getElementById('upiI').value;db.pin=document.getElementById('pinI').value;saveDB();closeModal();">APPLY</button>
                 <div class="grid grid-cols-2 gap-4">
-                    <button class="p-4 bg-green-700 rounded-2xl text-xs font-bold text-white" onclick="exportData()">BACKUP DATA</button>
-                    <button class="p-4 bg-blue-700 rounded-2xl text-xs font-bold text-white" onclick="document.getElementById('imp').click()">RESTORE DATA</button>
+                    <button class="p-4 bg-green-700 rounded-2xl text-xs font-bold text-white" onclick="exportData()">BACKUP</button>
+                    <button class="p-4 bg-blue-700 rounded-2xl text-xs font-bold text-white" onclick="document.getElementById('imp').click()">RESTORE</button>
                 </div>
                 <input type="file" id="imp" class="hidden" onchange="importData(event)">
             `);
@@ -248,17 +282,17 @@
         function importData(e) {
             const file = e.target.files[0]; if (!file) return;
             const reader = new FileReader();
-            reader.onload = (ev) => { try { const imported = JSON.parse(ev.target.result); if (imported.pin) { db = imported; saveDB(); location.reload(); } } catch (err) { alert("Failed!"); } };
+            reader.onload = (ev) => { try { db = JSON.parse(ev.target.result); saveDB(); location.reload(); } catch (err) { alert("Failed!"); } };
             reader.readAsText(file);
         }
 
         function openPDFModal() {
             openModal(`
                 <button class="close-btn" onclick="closeModal()">&times;</button>
-                <h2 class="mb-4 font-bold">Download PDF Report</h2>
+                <h2 class="mb-4 font-bold">PDF Report</h2>
                 <input id="ps" type="date" class="w-full p-4 rounded-xl text-black mb-2" value="2026-01-01">
                 <input id="pe" type="date" class="w-full p-4 rounded-xl text-black mb-4" value="${getToday()}">
-                <button class="w-full p-5 btn-primary rounded-2xl font-black" onclick="generatePDF()">DOWNLOAD PDF</button>
+                <button class="w-full p-5 btn-primary rounded-2xl font-black" onclick="generatePDF()">DOWNLOAD</button>
             `);
         }
 
@@ -267,9 +301,9 @@
             const filtered=db.trans.filter(t=>t.cid===activeCid && t.date>=s && t.date<=e).sort((a,b)=>new Date(a.date)-new Date(b.date));
             const el=document.createElement('div'); el.style.padding="40px"; el.style.background="#fff"; el.style.color="#000";
             let rt=0;
-            let rows=filtered.map(t=>{ rt+=(t.type==='GAVE'?t.amt:-t.amt); return `<tr><td style="border:1px solid #ddd;padding:12px">${fmtDate(t.date)}<br><small>${t.rem||''}</small></td><td style="border:1px solid #ddd;padding:12px;color:red">${t.type==='GAVE'?t.amt:'-'}</td><td style="border:1px solid #ddd;padding:12px;color:green">${t.type==='GOT'?t.amt:'-'}</td><td style="border:1px solid #ddd;padding:12px;font-weight:bold">₹${rt}</td></tr>`; }).join('');
-            el.innerHTML=`<h2 style="text-align:center">KHATA PRO - ${cust.name}</h2><table style="width:100%;border-collapse:collapse;margin-top:20px"><thead><tr style="background:#eee"><th>Date</th><th>Gave</th><th>Got</th><th>Balance</th></tr></thead><tbody>${rows}</tbody></table>`;
-            html2pdf().from(el).save(`${cust.name}_Khata.pdf`);
+            let rows=filtered.map(t=>{ rt+=(t.type==='GAVE'?t.amt:-t.amt); return `<tr><td style="border:1px solid #ddd;padding:12px">${fmtDate(t.date)}</td><td style="border:1px solid #ddd;padding:12px">${t.rem||'-'}</td><td style="border:1px solid #ddd;padding:12px;color:red">${t.type==='GAVE'?t.amt:'-'}</td><td style="border:1px solid #ddd;padding:12px;color:green">${t.type==='GOT'?t.amt:'-'}</td><td style="border:1px solid #ddd;padding:12px;font-weight:bold">₹${rt}</td></tr>`; }).join('');
+            el.innerHTML=`<h2 style="text-align:center">KHATA PRO - ${cust.name}</h2><table style="width:100%;border-collapse:collapse;margin-top:20px"><thead><tr style="background:#eee"><th>Date</th><th>Remarks</th><th>Gave</th><th>Got</th><th>Balance</th></tr></thead><tbody>${rows}</tbody></table>`;
+            html2pdf().from(el).save(`${cust.name}_Report.pdf`);
         }
 
         function openCustomer(id) { activeCid = id; render(); }
@@ -301,11 +335,11 @@
             `);
         }
         function saveCust(cid) { let n=document.getElementById('cn').value; if(n){ if(cid){ let c=db.customers.find(x=>x.id===cid); c.name=n; c.phone=document.getElementById('cp').value; }else{ db.customers.push({id:Date.now(), name:n, phone:document.getElementById('cp').value}); } saveDB(); closeModal(); } }
-        function deleteFullCust(cid) { if(confirm("ഈ കസ്റ്റമറെ പൂർണ്ണമായും ഒഴിവാക്കണോ?")) { db.customers=db.customers.filter(x=>x.id!==cid); db.trans=db.trans.filter(x=>x.cid!==cid); activeCid=null; saveDB(); closeModal(); } }
+        function deleteFullCust(cid) { if(confirm("Delete customer?")) { db.customers=db.customers.filter(x=>x.id!==cid); db.trans=db.trans.filter(x=>x.cid!==cid); activeCid=null; saveDB(); closeModal(); } }
 
         function openAddQuick(type) { 
             let options = db.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-            if(!options) return alert("ആദ്യം കസ്റ്റമറെ ചേർക്കുക");
+            if(!options) return alert("Add client first");
             openModal(`<button class="close-btn" onclick="closeModal()">&times;</button><h2 class="text-xl font-black mb-6 text-center text-white uppercase">QUICK ${type}</h2><select id="q_cid" class="w-full p-4 rounded-2xl mb-4 text-black">${options}</select><input id="q_amt" type="number" class="w-full p-6 mb-6 rounded-3xl text-4xl text-center text-blue-600 bg-white" placeholder="₹ 0"><button class="w-full p-5 btn-primary rounded-2xl font-black" onclick="saveQuick('${type}')">SAVE</button>`);
         }
         function saveQuick(type) { let cid=Number(document.getElementById('q_cid').value), a=Number(document.getElementById('q_amt').value); if(cid&&a){ db.trans.push({id:Date.now(), cid, type, amt:a, date:getToday(), mode:'CASH'}); saveDB(); closeModal(); } }
