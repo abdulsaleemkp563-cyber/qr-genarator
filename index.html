@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KHATA PRO | v360</title>
+    <title>KHATA PRO | v370</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -25,13 +25,15 @@
         .monthly-item { flex: 1; text-align: center; border-right: 1px solid rgba(0,0,0,0.1); }
         .monthly-item:last-child { border-right: none; }
         
-        .trans-row td { padding: 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px; }
-        .mode-tag { font-size: 8px; font-weight: 800; padding: 2px 4px; border-radius: 4px; display: block; margin-top: 2px; width: fit-content; }
-        .mode-cash { background: #15803d; color: white; }
-        .mode-upi { background: #1d4ed8; color: white; }
+        /* Table Layout Fix for 5 columns */
+        .trans-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .trans-table th { font-size: 9px; opacity: 0.5; text-transform: uppercase; padding: 10px 4px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .trans-table td { padding: 12px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 11px; vertical-align: top; }
         
+        .rem-text { font-size: 10px; color: #facc15; display: block; margin-top: 2px; font-weight: 600; line-height: 1.2; }
+        .mode-text { font-size: 9px; font-weight: 800; opacity: 0.8; }
         .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; }
-        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 28px; color: white; opacity: 0.8; font-weight: bold; }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 28px; color: white; font-weight: bold; }
         .overdue-blink { border: 2px solid #ef4444; animation: blink 1.5s infinite; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
     </style>
@@ -83,7 +85,7 @@
     </div>
 
     <script>
-        const STORAGE_ID = 'KHATA_V360_FINAL';
+        const STORAGE_ID = 'KHATA_V370_FINAL';
         let db = JSON.parse(localStorage.getItem(STORAGE_ID)) || { customers: [], trans: [], promises: [], pin: '1234', upi: '', darkMode: true };
         let activeCid = null, currentPinInput = "", searchQuery = "";
 
@@ -153,13 +155,12 @@
                     if(t.type === 'GAVE') mGave += t.amt; else mGot += t.amt;
                 }
                 rb += (t.type === 'GAVE' ? t.amt : -t.amt);
-                const mTag = `<span class="mode-tag ${t.mode==='UPI'?'mode-upi':'mode-cash'}">${t.mode || 'CASH'}</span>`;
-
+                
                 return `<tr class="trans-row" onclick="openEditTrans(${t.id})">
-                    <td class="opacity-60">${fmtDate(t.date)}</td>
-                    <td class="text-yellow-500 font-medium">${t.rem || '-'}</td>
-                    <td class="text-red-500 font-bold">₹${t.type==='GAVE'?t.amt:'-'}${t.type==='GAVE'?mTag:''}</td>
-                    <td class="text-green-500 font-bold">₹${t.type==='GOT'?t.amt:'-'}${t.type==='GOT'?mTag:''}</td>
+                    <td>${fmtDate(t.date)} <span class="rem-text">${t.rem || ''}</span></td>
+                    <td class="text-red-500 font-bold">₹${t.type==='GAVE'?t.amt:'-'}</td>
+                    <td class="text-green-500 font-bold">₹${t.type==='GOT'?t.amt:'-'}</td>
+                    <td class="mode-text ${t.mode==='UPI'?'text-blue-400':'text-green-400'}">${t.mode || 'CASH'}</td>
                     <td class="font-black">₹${rb}</td>
                 </tr>`;
             }).reverse().join('');
@@ -181,7 +182,21 @@
                     </div>
                 </div>`;
 
-            document.getElementById('mainContent').innerHTML = `<div class="mt-4 overflow-x-auto"><table class="w-full text-left"><thead><tr class="text-[10px] opacity-40 font-black border-b border-white/10"><th>DATE</th><th>REMARKS</th><th>GAVE</th><th>GOT</th><th>BAL</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+            document.getElementById('mainContent').innerHTML = `
+                <div class="mt-4">
+                    <table class="trans-table">
+                        <thead>
+                            <tr>
+                                <th>Date / Remarks</th>
+                                <th>Gave</th>
+                                <th>Got</th>
+                                <th>Method</th>
+                                <th>Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>`;
             document.getElementById('footerActions').innerHTML = `<div class="flex gap-4"><button class="flex-1 p-5 bg-red-600 rounded-3xl font-black text-white" onclick="openAdd('GAVE')">GAVE</button><button class="flex-1 p-5 bg-green-600 rounded-3xl font-black text-white" onclick="openAdd('GOT')">GOT</button></div>`;
         }
 
@@ -301,8 +316,8 @@
             const filtered=db.trans.filter(t=>t.cid===activeCid && t.date>=s && t.date<=e).sort((a,b)=>new Date(a.date)-new Date(b.date));
             const el=document.createElement('div'); el.style.padding="40px"; el.style.background="#fff"; el.style.color="#000";
             let rt=0;
-            let rows=filtered.map(t=>{ rt+=(t.type==='GAVE'?t.amt:-t.amt); return `<tr><td style="border:1px solid #ddd;padding:12px">${fmtDate(t.date)}</td><td style="border:1px solid #ddd;padding:12px">${t.rem||'-'}</td><td style="border:1px solid #ddd;padding:12px;color:red">${t.type==='GAVE'?t.amt:'-'}</td><td style="border:1px solid #ddd;padding:12px;color:green">${t.type==='GOT'?t.amt:'-'}</td><td style="border:1px solid #ddd;padding:12px;font-weight:bold">₹${rt}</td></tr>`; }).join('');
-            el.innerHTML=`<h2 style="text-align:center">KHATA PRO - ${cust.name}</h2><table style="width:100%;border-collapse:collapse;margin-top:20px"><thead><tr style="background:#eee"><th>Date</th><th>Remarks</th><th>Gave</th><th>Got</th><th>Balance</th></tr></thead><tbody>${rows}</tbody></table>`;
+            let rows=filtered.map(t=>{ rt+=(t.type==='GAVE'?t.amt:-t.amt); return `<tr><td style="border:1px solid #ddd;padding:12px">${fmtDate(t.date)}<br><small>${t.rem||''}</small></td><td style="border:1px solid #ddd;padding:12px;color:red">${t.type==='GAVE'?t.amt:'-'}</td><td style="border:1px solid #ddd;padding:12px;color:green">${t.type==='GOT'?t.amt:'-'}</td><td style="border:1px solid #ddd;padding:12px">${t.mode||'CASH'}</td><td style="border:1px solid #ddd;padding:12px;font-weight:bold">₹${rt}</td></tr>`; }).join('');
+            el.innerHTML=`<h2 style="text-align:center">KHATA PRO - ${cust.name}</h2><table style="width:100%;border-collapse:collapse;margin-top:20px"><thead><tr style="background:#eee"><th>Date</th><th>Gave</th><th>Got</th><th>Method</th><th>Balance</th></tr></thead><tbody>${rows}</tbody></table>`;
             html2pdf().from(el).save(`${cust.name}_Report.pdf`);
         }
 
