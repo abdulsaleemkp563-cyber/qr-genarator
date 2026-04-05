@@ -12,9 +12,9 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        :root { --brand-yellow: #facc15; --header-gold: #b58916; --bg-dark-green: #1a3c30; }
+        :root { --brand-yellow: #facc15; --header-gold: #b58916; }
         
-        body.dark-mode { background: var(--bg-dark-green); color: #f8fafc; }
+        body.dark-mode { background: #1a3c30; color: #f8fafc; }
         body.dark-mode .card-bg { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
         body.dark-mode .input-field { background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.1); }
         
@@ -26,34 +26,14 @@
         .header-custom { background-color: var(--header-gold); padding: 12px 16px; color: black; }
         .icon-btn-box { background: rgba(0,0,0,0.1); width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: none; }
         
-        .balance-card-premium { 
-            background: linear-gradient(135deg, #1f4a3a, #1a3c30);
-            border: 1px solid rgba(250, 204, 21, 0.2);
-            margin: -16px -16px 24px -16px; 
-            padding: 40px 16px; 
-            border-bottom-left-radius: 3rem; 
-            border-bottom-right-radius: 3rem; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
-            text-align: center;
-            backdrop-filter: blur(10px);
-        }
+        .yellow-card { background-color: var(--brand-yellow); color: black; margin: -16px -16px 20px -16px; padding: 20px 16px; border-bottom-left-radius: 2.5rem; border-bottom-right-radius: 2.5rem; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
         
-        .balance-card-premium p.net-label { color: var(--brand-yellow); font-size: 13px; font-weight: 700; text-transform: uppercase; opacity: 0.9; }
-        .balance-card-premium h2.net-amount { color: var(--brand-yellow); font-size: 50px; font-weight: 900; margin-top: 10px; tracking-tight; }
-        
-        .monthly-summary-box { background: rgba(0,0,0,0.2); border-radius: 1.5rem; padding: 16px 10px; display: flex; justify-content: space-between; align-items: center; margin-top: 24px; border: 1px solid rgba(255,255,255,0.05); }
-        .summary-item { flex: 1; text-align: center; }
-        .summary-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.1); }
-        .summary-label { font-size: 10px; font-weight: 800; color: white; opacity: 0.6; text-transform: uppercase; margin-bottom: 4px; }
-        .summary-value { font-size: 18px; font-weight: 900; color: white; }
-
         .trans-table { width: 100%; border-collapse: collapse; }
         .trans-table th { font-size: 10px; opacity: 0.6; padding: 12px 4px; text-align: left; text-transform: uppercase; border-bottom: 1px solid rgba(0,0,0,0.1); }
-        .trans-table td { padding: 16px 4px; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 15px; font-weight: 700; }
+        .trans-table td { padding: 16px 4px; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 14px; font-weight: 700; }
         
         .rem-info { font-size: 11px; color: #b58916; display: block; font-weight: 600; margin-top: 2px; }
         .mode-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.05); font-weight: 800; }
-        .btn-action-qr { padding: 12px; border-radius: 12px; width: 100%; font-weight: 800; margin-top: 10px; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; }
     </style>
 </head>
 <body class="dark-mode">
@@ -135,12 +115,11 @@
             renderPromises();
             
             let tGave=0, tGot=0; db.trans.forEach(t => { if(t.type==='GAVE') tGave += t.amt; else tGot += t.amt; });
-            let netBalance = tGave - tGot;
 
             document.getElementById('topArea').innerHTML = `
-                <div class="balance-card-premium shadow-2xl">
-                    <p class="net-label tracking-widest uppercase">Net Balance</p>
-                    <h2 class="net-amount tracking-tighter">₹${netBalance.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h2>
+                <div class="yellow-card text-center">
+                    <p class="text-[11px] font-extrabold opacity-60 uppercase">Net Balance</p>
+                    <h2 class="text-5xl font-black mt-2">₹${(tGave-tGot).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h2>
                 </div>`;
             
             document.getElementById('searchBox').innerHTML = `<input type="text" oninput="searchQuery=this.value;renderList()" placeholder="Search clients..." class="input-field w-full p-5 rounded-2xl outline-none font-bold">`;
@@ -155,7 +134,6 @@
             document.getElementById('custEditBtn').classList.remove('hidden');
             document.getElementById('dailyRow').classList.remove('hidden');
             document.getElementById('pageTitle').innerText = cust.name;
-            document.getElementById('custEditBtn').onclick = () => openCustModal(activeCid);
             
             let rb = 0, cToday = 0, uToday = 0, mGave = 0, mGot = 0;
             const today = getToday(), now = new Date();
@@ -167,49 +145,38 @@
                 if(d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) { if(t.type==='GAVE') mGave += t.amt; else mGot += t.amt; }
                 if(t.date === today && t.type === 'GOT') { if(t.mode==='UPI') uToday += t.amt; else cToday += t.amt; }
                 
+                // .toFixed(2) ഉപയോഗിച്ച് ഫിക്സ് ചെയ്തു
                 return `<tr onclick="openEditTrans(${t.id})">
                     <td>${fmtDate(t.date)} <span class="rem-info">${t.rem || ''}</span></td>
-                    <td class="text-red-500">₹${t.type==='GAVE'?t.amt:'-'}</td>
-                    <td class="text-green-500">₹${t.type==='GOT'?t.amt:'-'}</td>
+                    <td class="text-red-500">₹${t.type==='GAVE'?t.amt.toFixed(2):'-'}</td>
+                    <td class="text-green-500">₹${t.type==='GOT'?t.amt.toFixed(2):'-'}</td>
                     <td><span class="mode-badge ${t.mode==='UPI'?'text-blue-500':'text-green-600'}">${t.mode || 'CASH'}</span></td>
-                    <td class="text-right">₹${rb}</td>
+                    <td class="text-right">₹${rb.toFixed(2)}</td>
                 </tr>`;
             }).reverse().join('');
 
             document.getElementById('topArea').innerHTML = `
-                <div class="balance-card-premium shadow-2xl">
-                    <div class="flex justify-between gap-3 mb-8">
-                        <button onclick="shareWA('${cust.phone}', ${rb})" class="flex-1 bg-white/10 h-12 rounded-xl flex items-center justify-center"><i class="fa-brands fa-whatsapp text-2xl text-green-800"></i></button>
-                        <button onclick="openQR(${Math.abs(rb)})" class="flex-1 bg-white/10 h-12 rounded-xl flex items-center justify-center"><i class="fa-solid fa-qrcode text-2xl text-purple-800"></i></button>
-                        <button onclick="openPDFModal()" class="flex-1 bg-white/10 h-12 rounded-xl flex items-center justify-center"><i class="fa-solid fa-file-pdf text-2xl text-blue-800"></i></button>
-                        <button onclick="openPromiseModal()" class="flex-1 bg-white/10 h-12 rounded-xl flex items-center justify-center"><i class="fa-solid fa-calendar-check text-2xl text-orange-900"></i></button>
+                <div class="yellow-card">
+                    <div class="flex justify-between gap-3 mb-6">
+                        <button onclick="shareWA('${cust.phone}', ${rb.toFixed(2)})" class="flex-1 bg-black/10 h-12 rounded-xl flex items-center justify-center"><i class="fa-brands fa-whatsapp text-2xl text-green-800"></i></button>
+                        <button onclick="openQR(${Math.abs(rb).toFixed(2)})" class="flex-1 bg-black/10 h-12 rounded-xl flex items-center justify-center"><i class="fa-solid fa-qrcode text-2xl text-purple-800"></i></button>
+                        <button onclick="openPDFModal()" class="flex-1 bg-black/10 h-12 rounded-xl flex items-center justify-center"><i class="fa-solid fa-file-pdf text-2xl text-blue-800"></i></button>
+                        <button onclick="openPromiseModal()" class="flex-1 bg-black/10 h-12 rounded-xl flex items-center justify-center"><i class="fa-solid fa-calendar-check text-2xl text-orange-900"></i></button>
                     </div>
                     <div class="text-center mb-6">
-                        <p class="net-label tracking-widest uppercase">Total Balance</p>
-                        <h2 class="net-amount tracking-tighter">₹${Math.abs(rb).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h2>
+                        <p class="text-[10px] font-black opacity-60 uppercase">Total Balance</p>
+                        <h2 class="text-5xl font-black">₹${Math.abs(rb).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h2>
                     </div>
-                    
-                    <div class="monthly-summary-box">
-                        <div class="summary-item">
-                            <p class="summary-label">Monthly Gave</p>
-                            <p class="summary-value text-red-500">₹${mGave}</p>
-                        </div>
-                        <div class="summary-divider"></div>
-                        <div class="summary-item">
-                            <p class="summary-label">Monthly Got</p>
-                            <p class="summary-value text-green-600">₹${mGot}</p>
-                        </div>
-                        <div class="summary-divider"></div>
-                        <div class="summary-item">
-                            <p class="summary-label">Monthly Total</p>
-                            <p class="summary-value text-white">₹${mGave - mGot}</p>
-                        </div>
+                    <div class="bg-black/5 rounded-2xl p-4 flex justify-between">
+                        <div class="text-center flex-1 border-r border-black/5"><p class="text-[10px] font-black text-red-700">GAVE</p><p class="text-lg font-black">₹${mGave.toFixed(2)}</p></div>
+                        <div class="text-center flex-1 border-r border-black/5"><p class="text-[10px] font-black text-green-800">GOT</p><p class="text-lg font-black">₹${mGot.toFixed(2)}</p></div>
+                        <div class="text-center flex-1"><p class="text-[10px] font-black">NET</p><p class="text-lg font-black">₹${(mGave - mGot).toFixed(2)}</p></div>
                     </div>
                 </div>`;
 
             document.getElementById('dailyRow').innerHTML = `
-                <div class="card-bg p-4 rounded-2xl text-center"><p class="text-[9px] font-black opacity-60">CASH TODAY</p><p class="text-green-500 font-black">₹${cToday}</p></div>
-                <div class="card-bg p-4 rounded-2xl text-center"><p class="text-[9px] font-black opacity-60">UPI TODAY</p><p class="text-blue-500 font-black">₹${uToday}</p></div>
+                <div class="card-bg p-4 rounded-2xl text-center"><p class="text-[9px] font-black opacity-60">CASH TODAY</p><p class="text-green-500 font-black">₹${cToday.toFixed(2)}</p></div>
+                <div class="card-bg p-4 rounded-2xl text-center"><p class="text-[9px] font-black opacity-60">UPI TODAY</p><p class="text-blue-500 font-black">₹${uToday.toFixed(2)}</p></div>
             `;
 
             document.getElementById('mainContent').innerHTML = `<table class="trans-table"><thead><tr><th>Date</th><th>Gave</th><th>Got</th><th>Method</th><th class="text-right">Bal</th></tr></thead><tbody>${rows}</tbody></table>`;
@@ -221,7 +188,7 @@
             let html = `<div class="space-y-3">`;
             filtered.forEach(c => {
                 let bal = 0; db.trans.filter(t => t.cid === c.id).forEach(t => bal += (t.type==='GAVE' ? t.amt : -t.amt));
-                html += `<div class="flex items-center p-4 rounded-2xl card-bg" onclick="openCustomer(${c.id})"><div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center font-black text-white text-lg">${c.name[0]}</div><div class="flex-1 ml-4"><p class="font-bold text-lg text-white-fixed">${c.name}</p></div><div class="text-right"><p class="font-black text-lg ${bal>=0?'text-red-500':'text-green-500'}">₹${Math.abs(bal)}</p></div></div>`;
+                html += `<div class="flex items-center p-4 rounded-2xl card-bg" onclick="openCustomer(${c.id})"><div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center font-black text-white text-lg">${c.name[0]}</div><div class="flex-1 ml-4"><p class="font-bold text-lg text-white-fixed">${c.name}</p></div><div class="text-right"><p class="font-black text-lg ${bal>=0?'text-red-500':'text-green-500'}">₹${Math.abs(bal).toFixed(2)}</p></div></div>`;
             });
             document.getElementById('mainContent').innerHTML = html + `</div>`;
         }
@@ -259,7 +226,7 @@
         function openAdd(type) {
             openModal(`
                 <h2 class="text-xl font-black mb-6 text-center text-white uppercase">${type}</h2>
-                <input id="ta" type="number" class="w-full p-6 mb-4 rounded-3xl text-4xl text-center text-blue-600 bg-white font-bold" placeholder="₹ 0" autofocus>
+                <input id="ta" type="number" step="0.01" class="w-full p-6 mb-4 rounded-3xl text-4xl text-center text-blue-600 bg-white font-bold" placeholder="₹ 0" autofocus>
                 <div class="flex gap-2 mb-4">
                     <button id="mCash" onclick="setM('CASH')" class="flex-1 p-4 rounded-xl border-2 font-bold text-white">CASH</button>
                     <button id="mUpi" onclick="setM('UPI')" class="flex-1 p-4 rounded-xl border-2 font-bold text-white">UPI</button>
@@ -294,7 +261,7 @@
                 </div>
                 
                 <button class="w-full p-4 bg-red-600 rounded-xl text-white font-black text-sm mb-4" onclick="deleteAllData()">
-                    <i class="fa-solid fa-triangle-exclamation mr-2"></i> ALL DELETE (WIPE ALL)
+                    <i class="fa-solid fa-trash-can mr-2"></i> ALL DELETE (WIPE ALL)
                 </button>
                 
                 <button class="w-full text-gray-400 font-bold" onclick="closeModal()">Close</button>
@@ -302,16 +269,9 @@
             `);
         }
 
-        // പുതിയ All Delete ഫംഗ്‌ഷൻ
         function deleteAllData() {
-            if(confirm("മുന്നറിയിപ്പ്: ഈ ആപ്പിലെ എല്ലാ കസ്റ്റമർ വിവരങ്ങളും ഇടപാടുകളും ഡിലീറ്റ് ചെയ്യപ്പെടും. ഇത് തിരിച്ചു കിട്ടില്ല. ഡിലീറ്റ് ചെയ്യട്ടെ?")) {
-                db.customers = [];
-                db.trans = [];
-                db.promises = [];
-                activeCid = null;
-                saveDB();
-                alert("എല്ലാ വിവരങ്ങളും ഡിലീറ്റ് ചെയ്തു.");
-                closeModal();
+            if(confirm("ശ്രദ്ധിക്കുക: എല്ലാ വിവരങ്ങളും ഡിലീറ്റ് ചെയ്യപ്പെടും. തുടരണോ?")) {
+                db.customers = []; db.trans = []; db.promises = []; activeCid = null; saveDB(); alert("Deleted!"); closeModal();
             }
         }
 
@@ -319,7 +279,7 @@
             const t = db.trans.find(x => x.id === tid);
             openModal(`
                 <h2 class="text-xl font-black mb-6 text-center text-white">EDIT ENTRY</h2>
-                <input id="eta" type="number" class="w-full p-5 mb-4 rounded-2xl text-2xl text-center text-blue-600 bg-white font-bold" value="${t.amt}">
+                <input id="eta" type="number" step="0.01" class="w-full p-5 mb-4 rounded-2xl text-2xl text-center text-blue-600 bg-white font-bold" value="${t.amt}">
                 <input id="etr" type="text" class="w-full p-4 rounded-xl mb-4 text-black font-bold bg-white" value="${t.rem || ''}">
                 <input id="etd" type="date" class="w-full p-4 rounded-xl mb-6 text-black bg-white" value="${t.date}">
                 <button class="w-full p-5 bg-blue-600 rounded-xl font-black text-white mb-3" onclick="updateTrans(${tid})">UPDATE</button>
@@ -330,8 +290,8 @@
 
         function updateTrans(tid) { const t=db.trans.find(x=>x.id===tid); t.amt=Number(document.getElementById('eta').value); t.rem=document.getElementById('etr').value; t.date=document.getElementById('etd').value; saveDB(); closeModal(); }
         function deleteTrans(tid) { if(confirm("Delete?")) { db.trans=db.trans.filter(x=>x.id!==tid); saveDB(); closeModal(); } }
-        function openPromiseModal() { openModal(`<h2 class="text-xl font-black mb-6 text-center text-white">ADD PROMISE</h2><input id="pa" type="number" class="w-full p-5 rounded-2xl mb-4 text-black font-bold bg-white" placeholder="Amount"><input id="pd" type="date" class="w-full p-5 rounded-2xl mb-6 text-black bg-white" value="${getToday()}"><button class="w-full p-5 bg-blue-600 rounded-2xl font-black text-white" onclick="savePromise()">SET PROMISE</button><button class="w-full mt-4 text-gray-400 font-bold" onclick="closeModal()">Cancel</button>`); }
-        function savePromise() { let a=document.getElementById('pa').value, d=document.getElementById('pd').value; if(a&&d){ db.promises.push({id:Date.now(), cid:activeCid, amt:a, date:d}); saveDB(); closeModal(); } }
+        function openPromiseModal() { openModal(`<h2 class="text-xl font-black mb-6 text-center text-white">ADD PROMISE</h2><input id="pa" type="number" step="0.01" class="w-full p-5 rounded-2xl mb-4 text-black font-bold bg-white" placeholder="Amount"><input id="pd" type="date" class="w-full p-5 rounded-2xl mb-6 text-black bg-white" value="${getToday()}"><button class="w-full p-5 bg-blue-600 rounded-2xl font-black text-white" onclick="savePromise()">SET PROMISE</button><button class="w-full mt-4 text-gray-400 font-bold" onclick="closeModal()">Cancel</button>`); }
+        function savePromise() { let a=document.getElementById('pa').value, d=document.getElementById('pd').value; if(a&&d){ db.promises.push({id:Date.now(), cid:activeCid, amt:Number(a), date:d}); saveDB(); closeModal(); } }
         function deletePromise(id) { if(confirm("Promise Delete ചെയ്യണോ?")) { db.promises=db.promises.filter(x=>x.id!==id); saveDB(); } }
         function settlePromise(id) { const p=db.promises.find(x=>x.id===id); db.trans.push({id:Date.now(), cid:p.cid, type:'GOT', amt:Number(p.amt), date:getToday(), mode:'CASH', rem:'Promise Paid'}); db.promises=db.promises.filter(x=>x.id!==id); saveDB(); }
 
@@ -352,7 +312,7 @@
             const filtered=db.trans.filter(t=>t.cid===activeCid && t.date>=s && t.date<=e).sort((a,b)=>new Date(a.date)-new Date(b.date));
             const el=document.createElement('div'); el.style.padding="30px"; el.style.background="#fff"; el.style.color="#000"; el.style.fontSize="12px";
             let rt=0;
-            let rows=filtered.map(t=>{ rt+=(t.type==='GAVE'?t.amt:-t.amt); return `<tr><td style="border:1px solid #ddd;padding:8px">${fmtDate(t.date)}<br><small>${t.rem||''}</small></td><td style="border:1px solid #ddd;padding:8px;color:red">${t.type==='GAVE'?'₹'+t.amt:'-'}</td><td style="border:1px solid #ddd;padding:8px;color:green">${t.type==='GOT'?'₹'+t.amt:'-'}</td><td style="border:1px solid #ddd;padding:8px">${t.mode||'CASH'}</td><td style="border:1px solid #ddd;padding:8px;font-weight:bold">₹${rt}</td></tr>`; }).join('');
+            let rows=filtered.map(t=>{ rt+=(t.type==='GAVE'?t.amt:-t.amt); return `<tr><td style="border:1px solid #ddd;padding:8px">${fmtDate(t.date)}<br><small>${t.rem||''}</small></td><td style="border:1px solid #ddd;padding:8px;color:red">${t.type==='GAVE'?'₹'+t.amt.toFixed(2):'-'}</td><td style="border:1px solid #ddd;padding:8px;color:green">${t.type==='GOT'?'₹'+t.amt.toFixed(2):'-'}</td><td style="border:1px solid #ddd;padding:8px">${t.mode||'CASH'}</td><td style="border:1px solid #ddd;padding:8px;font-weight:bold">₹${rt.toFixed(2)}</td></tr>`; }).join('');
             el.innerHTML=`<h2 style="text-align:center;margin-bottom:10px">${cust.name} - Statement</h2><p style="text-align:center;margin-bottom:20px">${fmtDate(s)} to ${fmtDate(e)}</p><table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f2f2f2"><th>Date</th><th>Gave</th><th>Got</th><th>Mode</th><th>Balance</th></tr></thead><tbody>${rows}</tbody></table>`;
             html2pdf().set({ margin: 1, filename: `${cust.name}_Statement.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).from(el).save();
         }
