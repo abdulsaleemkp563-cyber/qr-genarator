@@ -125,20 +125,20 @@
         function toggleTheme() { db.darkMode = !db.darkMode; saveDB(); }
         function lockApp() { currentPinInput = ""; updateDots(); document.getElementById('lockScreen').style.display = 'flex'; document.getElementById('mainApp').style.display = 'none'; }
         function pressKey(n) { if(currentPinInput.length < 4) { currentPinInput += n; updateDots(); if(currentPinInput.length === 4) setTimeout(checkPin, 200); } }
-        function updateDots() { for(let i=0; i<4; i++) document.getElementById(`dot-${i}`).style.background = i < currentPinInput.length ? '#3b82f6' : 'transparent'; }
-        function checkPin() { if(currentPinInput === db.pin || currentPinInput === "1234") { document.getElementById('lockScreen').style.display = 'none'; document.getElementById('mainApp').style.display = 'flex'; render(); } else { alert("Wrong PIN"); currentPinInput = ""; updateDots(); } }
-        function resetPin() { if(confirm("Reset PIN to 1234?")) { db.pin = "1234"; saveDB(); } }
-
-        function render() { 
-            document.body.className = db.darkMode ? 'dark-mode' : 'light-mode';
-            document.getElementById('themeIcon').className = db.darkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-            activeCid ? renderDetails() : renderHome(); 
-        }
-
-        function handleTitleClick() { if(activeCid) openCustModal(activeCid); }
-
-        function renderHome() {
-            activeCid = null;
+         let rows = trans.map(t => {
+                const d = new Date(t.date);
+                rb += (t.type === 'GAVE' ? t.amt : -t.amt);
+                if(d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) { if(t.type==='GAVE') mGave += t.amt; else mGot += t.amt; }
+                if(t.date === today && t.type === 'GOT') { if(t.mode==='UPI') uToday += t.amt; else cToday += t.amt; }
+                
+                return `<tr onclick="openEditTrans(${t.id})">
+                    <td>${fmtDate(t.date)} <span class="rem-info">${t.rem || ''}</span></td>
+                    <td class="text-red-500">₹${t.type==='GAVE'?t.amt.toFixed(2):'-'}</td>
+                    <td class="text-green-500">₹${t.type==='GOT'?t.amt.toFixed(2):'-'}</td>
+                    <td><span class="mode-badge ${t.mode==='UPI'?'text-blue-500':'text-green-600'}">${t.mode || 'CASH'}</span></td>
+                    <td class="text-right">₹${rb.toFixed(2)}</td>
+                </tr>`;
+            }).reverse().join('');null;
             document.getElementById('backBtn').classList.add('hidden');
             document.getElementById('custEditBtn').classList.add('hidden');
             document.getElementById('dailyRow').classList.add('hidden');
