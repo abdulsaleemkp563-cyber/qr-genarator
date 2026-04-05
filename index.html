@@ -18,46 +18,48 @@
             --bg-dark-green: #1a3c30; 
         }
         
-        body.dark-mode { background: var(--bg-dark-green); color: #f8fafc; }
+        body.dark-mode { background: var(--bg-dark-green); color: #f8fafc; overflow-x: hidden; }
         body.dark-mode .card-bg { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
         body.dark-mode .input-field { background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.1); }
         
-        body.light-mode { background: #f1f5f9; color: #0f172a; }
-        body.light-mode .card-bg { background: white; border: 1px solid #e2e8f0; color: #0f172a; }
-        body.light-mode .input-field { background: white; color: black; border: 1px solid #cbd5e1; }
+        body.light-mode { background: #f1f5f9; color: #0f172a; overflow-x: hidden; }
+        body.light-mode .card-bg { background: white; border: 1px solid #e2e8f0; }
 
         .header-custom { background-color: var(--header-gold); padding: 12px 16px; color: black; }
-        .icon-btn-box { background: rgba(0,0,0,0.1); width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: none; }
+        .icon-btn-box { background: rgba(0,0,0,0.1); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: none; }
         
         .yellow-card-premium { 
             background: linear-gradient(180deg, var(--brand-yellow) 0%, #eab308 100%); 
             color: black; 
             margin: -16px -16px 20px -16px; 
-            padding: 24px 16px; 
-            border-bottom-left-radius: 3rem; 
-            border-bottom-right-radius: 3rem; 
+            padding: 20px 16px; 
+            border-bottom-left-radius: 2.5rem; 
+            border-bottom-right-radius: 2.5rem; 
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); 
         }
         
         .summary-box { 
             background: rgba(0,0,0,0.05); 
-            border-radius: 1.5rem; 
-            padding: 16px; 
+            border-radius: 1.2rem; 
+            padding: 12px; 
             display: flex; 
             justify-content: space-between; 
-            margin-top: 20px;
+            margin-top: 15px;
+            gap: 5px;
         }
-        .summary-item { text-align: center; flex: 1; }
-        .summary-label { font-size: 10px; font-weight: 800; opacity: 0.6; text-transform: uppercase; margin-bottom: 4px; }
-        .summary-value { font-size: 18px; font-weight: 900; }
-        .summary-divider { width: 1px; background: rgba(0,0,0,0.1); margin: 0 10px; }
+        .summary-item { text-align: center; flex: 1; min-width: 0; }
+        .summary-label { font-size: 8px; font-weight: 800; opacity: 0.6; text-transform: uppercase; margin-bottom: 2px; white-space: nowrap; }
+        .summary-value { font-size: 14px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; }
+        .summary-divider { width: 1px; background: rgba(0,0,0,0.1); }
 
-        .trans-table { width: 100%; border-collapse: collapse; }
-        .trans-table th { font-size: 10px; opacity: 0.6; padding: 12px 4px; text-align: left; text-transform: uppercase; border-bottom: 1px solid rgba(0,0,0,0.1); }
-        .trans-table td { padding: 16px 4px; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 15px; font-weight: 700; }
+        /* TABLE FIX FOR MOBILE */
+        .table-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .trans-table { width: 100%; border-collapse: collapse; min-width: 320px; table-layout: fixed; }
+        .trans-table th { font-size: 9px; opacity: 0.6; padding: 10px 4px; text-align: left; text-transform: uppercase; border-bottom: 1px solid rgba(0,0,0,0.1); }
+        .trans-table td { padding: 12px 4px; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 13px; font-weight: 700; word-break: break-all; }
         
-        .rem-info { font-size: 11px; color: #b58916; display: block; font-weight: 600; margin-top: 2px; }
-        .mode-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.05); font-weight: 800; }
+        .rem-info { font-size: 10px; color: #b58916; display: block; font-weight: 600; margin-top: 2px; }
+        .mode-badge { font-size: 9px; padding: 2px 4px; border-radius: 4px; background: rgba(0,0,0,0.05); font-weight: 800; }
     </style>
 </head>
 <body class="dark-mode">
@@ -81,13 +83,13 @@
         </div>
     </div>
 
-    <div class="app max-w-[480px] mx-auto min-h-screen flex flex-col" id="mainApp" style="display:none;">
+    <div class="app w-full max-w-[480px] mx-auto min-h-screen flex flex-col" id="mainApp" style="display:none;">
         <header class="header-custom flex justify-between items-center sticky top-0 z-50">
-            <div class="flex items-center gap-3">
-                <button id="backBtn" onclick="goHome()" class="hidden text-black text-2xl"><i class="fa-solid fa-arrow-left"></i></button>
-                <h1 id="pageTitle" onclick="handleTitleClick()" class="text-xl font-black">KHATA PRO</h1>
+            <div class="flex items-center gap-2 overflow-hidden">
+                <button id="backBtn" onclick="goHome()" class="hidden text-black text-xl"><i class="fa-solid fa-arrow-left"></i></button>
+                <h1 id="pageTitle" onclick="handleTitleClick()" class="text-lg font-black truncate">KHATA PRO</h1>
             </div>
-            <div class="flex gap-2">
+            <div class="flex gap-1">
                 <button onclick="toggleTheme()" class="icon-btn-box text-black"><i id="themeIcon" class="fa-solid fa-sun"></i></button>
                 <button onclick="lockApp()" class="icon-btn-box text-red-900"><i class="fa-solid fa-lock"></i></button>
                 <button id="custEditBtn" class="hidden icon-btn-box text-blue-900"><i class="fa-solid fa-user-pen"></i></button>
@@ -95,15 +97,15 @@
             </div>
         </header>
 
-        <main class="flex-1 overflow-y-auto p-4 pb-44">
+        <main class="flex-1 p-4 pb-44 overflow-x-hidden">
             <div id="promiseHeader" class="mb-4 space-y-2"></div>
             <div id="topArea"></div>
             <div id="dailyRow" class="grid grid-cols-2 gap-3 mb-4 hidden"></div>
             <div id="searchBox" class="mb-4"></div>
-            <div id="mainContent"></div>
+            <div id="mainContent" class="table-container"></div>
         </main>
         
-        <div id="footerActions" class="fixed bottom-0 w-full max-w-[480px] p-6 rounded-t-[2.5rem] bg-black/40 backdrop-blur-xl"></div>
+        <div id="footerActions" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] p-6 rounded-t-[2.5rem] bg-black/40 backdrop-blur-xl"></div>
     </div>
 
     <script>
@@ -143,10 +145,10 @@
             document.getElementById('topArea').innerHTML = `
                 <div class="yellow-card-premium text-center">
                     <p class="text-[11px] font-extrabold opacity-60 uppercase">Net Balance</p>
-                    <h2 class="text-5xl font-black mt-2">₹${(tGave-tGot).toFixed(2)}</h2>
+                    <h2 class="text-4xl font-black mt-2">₹${(tGave-tGot).toFixed(2)}</h2>
                 </div>`;
             
-            document.getElementById('searchBox').innerHTML = `<input type="text" oninput="searchQuery=this.value;renderList()" placeholder="Search clients..." class="input-field w-full p-5 rounded-2xl outline-none font-bold">`;
+            document.getElementById('searchBox').innerHTML = `<input type="text" oninput="searchQuery=this.value;renderList()" placeholder="Search clients..." class="input-field w-full p-4 rounded-xl outline-none font-bold">`;
             renderList();
             document.getElementById('footerActions').innerHTML = `<button class="w-full p-5 bg-blue-600 rounded-2xl font-black text-xl text-white shadow-xl" onclick="openCustModal()"><i class="fa-solid fa-user-plus mr-2"></i> NEW CLIENT</button>`;
         }
@@ -158,7 +160,6 @@
             document.getElementById('custEditBtn').classList.remove('hidden');
             document.getElementById('dailyRow').classList.remove('hidden');
             document.getElementById('pageTitle').innerText = cust.name;
-            document.getElementById('custEditBtn').onclick = () => openCustModal(activeCid);
             
             let rb = 0, cToday = 0, uToday = 0, mGave = 0, mGot = 0;
             const today = getToday(), now = new Date();
@@ -171,50 +172,56 @@
                 if(t.date === today && t.type === 'GOT') { if(t.mode==='UPI') uToday += t.amt; else cToday += t.amt; }
                 
                 return `<tr onclick="openEditTrans(${t.id})">
-                    <td>${fmtDate(t.date)} <span class="rem-info">${t.rem || ''}</span></td>
-                    <td class="text-red-500">₹${t.type==='GAVE'?t.amt.toFixed(2):'-'}</td>
-                    <td class="text-green-500">₹${t.type==='GOT'?t.amt.toFixed(2):'-'}</td>
-                    <td><span class="mode-badge ${t.mode==='UPI'?'text-blue-500':'text-green-600'}">${t.mode || 'CASH'}</span></td>
-                    <td class="text-right">₹${rb.toFixed(2)}</td>
+                    <td style="width:25%">${fmtDate(t.date)} <span class="rem-info">${t.rem || ''}</span></td>
+                    <td class="text-red-500" style="width:20%">₹${t.type==='GAVE'?t.amt.toFixed(2):'-'}</td>
+                    <td class="text-green-500" style="width:20%">₹${t.type==='GOT'?t.amt.toFixed(2):'-'}</td>
+                    <td style="width:15%"><span class="mode-badge ${t.mode==='UPI'?'text-blue-500':'text-green-600'}">${t.mode || 'CASH'}</span></td>
+                    <td class="text-right" style="width:20%">₹${rb.toFixed(2)}</td>
                 </tr>`;
             }).reverse().join('');
 
             document.getElementById('topArea').innerHTML = `
                 <div class="yellow-card-premium">
-                    <div class="flex justify-between gap-3 mb-6">
-                        <button onclick="shareWA('${cust.phone}', ${rb.toFixed(2)})" class="flex-1 bg-black/10 h-12 rounded-xl flex items-center justify-center"><i class="fa-brands fa-whatsapp text-2xl text-green-800"></i></button>
-                        <button onclick="openQR(${Math.abs(rb).toFixed(2)})" class="flex-1 bg-black/10 h-12 rounded-xl flex items-center justify-center"><i class="fa-solid fa-qrcode text-2xl text-purple-800"></i></button>
-                        <button onclick="openPDFModal()" class="flex-1 bg-black/10 h-12 rounded-xl flex items-center justify-center"><i class="fa-solid fa-file-pdf text-2xl text-blue-800"></i></button>
-                        <button onclick="openPromiseModal()" class="flex-1 bg-black/10 h-12 rounded-xl flex items-center justify-center"><i class="fa-solid fa-calendar-check text-2xl text-orange-900"></i></button>
+                    <div class="flex justify-between gap-2 mb-6">
+                        <button onclick="shareWA('${cust.phone}', ${rb.toFixed(2)})" class="flex-1 bg-black/10 h-10 rounded-lg flex items-center justify-center"><i class="fa-brands fa-whatsapp text-xl text-green-800"></i></button>
+                        <button onclick="openQR(${Math.abs(rb).toFixed(2)})" class="flex-1 bg-black/10 h-10 rounded-lg flex items-center justify-center"><i class="fa-solid fa-qrcode text-xl text-purple-800"></i></button>
+                        <button onclick="openPDFModal()" class="flex-1 bg-black/10 h-10 rounded-lg flex items-center justify-center"><i class="fa-solid fa-file-pdf text-xl text-blue-800"></i></button>
+                        <button onclick="openPromiseModal()" class="flex-1 bg-black/10 h-10 rounded-lg flex items-center justify-center"><i class="fa-solid fa-calendar-check text-xl text-orange-900"></i></button>
                     </div>
                     <div class="text-center mb-6">
                         <p class="text-[10px] font-black opacity-60 uppercase">Total Balance</p>
-                        <h2 class="text-5xl font-black">₹${Math.abs(rb).toFixed(2)}</h2>
+                        <h2 class="text-4xl font-black">₹${Math.abs(rb).toFixed(2)}</h2>
                     </div>
                     <div class="summary-box">
                         <div class="summary-item">
-                            <p class="summary-label">Monthly Gave</p>
+                            <p class="summary-label">M-GAVE</p>
                             <p class="summary-value text-red-600">₹${mGave.toFixed(2)}</p>
                         </div>
                         <div class="summary-divider"></div>
                         <div class="summary-item">
-                            <p class="summary-label">Monthly Got</p>
+                            <p class="summary-label">M-GOT</p>
                             <p class="summary-value text-green-800">₹${mGot.toFixed(2)}</p>
                         </div>
                         <div class="summary-divider"></div>
                         <div class="summary-item">
-                            <p class="summary-label">Monthly Total</p>
+                            <p class="summary-label">M-TOTAL</p>
                             <p class="summary-value text-white">₹${(mGave - mGot).toFixed(2)}</p>
                         </div>
                     </div>
                 </div>`;
 
             document.getElementById('dailyRow').innerHTML = `
-                <div class="card-bg p-4 rounded-2xl text-center"><p class="text-[9px] font-black opacity-60">CASH TODAY</p><p class="text-green-500 font-black">₹${cToday.toFixed(2)}</p></div>
-                <div class="card-bg p-4 rounded-2xl text-center"><p class="text-[9px] font-black opacity-60">UPI TODAY</p><p class="text-blue-500 font-black">₹${uToday.toFixed(2)}</p></div>
+                <div class="card-bg p-3 rounded-xl text-center"><p class="text-[8px] font-black opacity-60">CASH TODAY</p><p class="text-green-500 font-black text-sm">₹${cToday.toFixed(2)}</p></div>
+                <div class="card-bg p-3 rounded-xl text-center"><p class="text-[8px] font-black opacity-60">UPI TODAY</p><p class="text-blue-500 font-black text-sm">₹${uToday.toFixed(2)}</p></div>
             `;
 
-            document.getElementById('mainContent').innerHTML = `<table class="trans-table"><thead><tr><th>Date</th><th>Gave</th><th>Got</th><th>Method</th><th class="text-right">Bal</th></tr></thead><tbody>${rows}</tbody></table>`;
+            document.getElementById('mainContent').innerHTML = `
+                <div class="table-container">
+                    <table class="trans-table">
+                        <thead><tr><th style="width:25%">Date</th><th style="width:20%">Gave</th><th style="width:20%">Got</th><th style="width:15%">Mode</th><th class="text-right" style="width:20%">Bal</th></tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>`;
             document.getElementById('footerActions').innerHTML = `<div class="flex gap-4"><button class="flex-1 p-5 bg-red-600 rounded-3xl font-black text-white text-xl shadow-lg" onclick="openAdd('GAVE')">GAVE</button><button class="flex-1 p-5 bg-green-600 rounded-3xl font-black text-white text-xl shadow-lg" onclick="openAdd('GOT')">GOT</button></div>`;
         }
 
@@ -223,7 +230,7 @@
             let html = `<div class="space-y-3">`;
             filtered.forEach(c => {
                 let bal = 0; db.trans.filter(t => t.cid === c.id).forEach(t => bal += (t.type==='GAVE' ? t.amt : -t.amt));
-                html += `<div class="flex items-center p-4 rounded-2xl card-bg" onclick="openCustomer(${c.id})"><div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center font-black text-white text-lg">${c.name[0]}</div><div class="flex-1 ml-4"><p class="font-bold text-lg">${c.name}</p></div><div class="text-right"><p class="font-black text-lg ${bal>=0?'text-red-500':'text-green-500'}">₹${Math.abs(bal).toFixed(2)}</p></div></div>`;
+                html += `<div class="flex items-center p-4 rounded-xl card-bg" onclick="openCustomer(${c.id})"><div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-black text-white">${c.name[0]}</div><div class="flex-1 ml-3"><p class="font-bold text-sm">${c.name}</p></div><div class="text-right"><p class="font-black text-sm ${bal>=0?'text-red-500':'text-green-500'}">₹${Math.abs(bal).toFixed(2)}</p></div></div>`;
             });
             document.getElementById('mainContent').innerHTML = html + `</div>`;
         }
@@ -232,11 +239,11 @@
             let h = "";
             db.promises.forEach(p => {
                 const c = db.customers.find(x => x.id === p.cid); if(!c) return;
-                h += `<div class="p-4 rounded-2xl flex justify-between items-center mb-2 card-bg" onclick="openCustomer(${c.id})">
-                    <div class="flex-1 text-left"><h3 class="font-bold text-sm">${c.name}: ₹${Number(p.amt).toFixed(2)}</h3><p class="text-[10px] opacity-60">Due: ${fmtDate(p.date)}</p></div>
+                h += `<div class="p-3 rounded-xl flex justify-between items-center mb-2 card-bg" onclick="openCustomer(${c.id})">
+                    <div class="flex-1 text-left"><h3 class="font-bold text-xs">${c.name}: ₹${Number(p.amt).toFixed(2)}</h3><p class="text-[9px] opacity-60">Due: ${fmtDate(p.date)}</p></div>
                     <div class="flex gap-2">
-                        <button onclick="event.stopPropagation();settlePromise(${p.id})" class="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center text-white"><i class="fa-solid fa-check"></i></button>
-                        <button onclick="event.stopPropagation();deletePromise(${p.id})" class="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center text-white"><i class="fa-solid fa-trash-can"></i></button>
+                        <button onclick="event.stopPropagation();settlePromise(${p.id})" class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center text-white text-xs"><i class="fa-solid fa-check"></i></button>
+                        <button onclick="event.stopPropagation();deletePromise(${p.id})" class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white text-xs"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                 </div>`;
             });
@@ -246,53 +253,53 @@
         function openCustModal(cid=null) {
             const c = cid ? db.customers.find(x=>x.id===cid) : {name:'', phone:''};
             openModal(`
-                <h2 class="text-xl font-black mb-6 text-center text-white uppercase">${cid?'Edit':'New'} Client</h2>
-                <input id="cn" class="w-full p-5 rounded-2xl mb-4 text-black text-lg font-bold bg-white" placeholder="Name" value="${c.name}">
-                <input id="cp" type="number" class="w-full p-5 rounded-2xl mb-6 text-black text-lg font-bold bg-white" placeholder="Phone" value="${c.phone}">
-                <button class="w-full p-5 bg-blue-600 rounded-2xl font-black text-white text-xl shadow-xl" onclick="saveCust(${cid})">SAVE</button>
+                <h2 class="text-xl font-black mb-4 text-center text-white uppercase">${cid?'Edit':'New'} Client</h2>
+                <input id="cn" class="w-full p-4 rounded-xl mb-3 text-black font-bold" placeholder="Name" value="${c.name}">
+                <input id="cp" type="number" class="w-full p-4 rounded-xl mb-4 text-black font-bold" placeholder="Phone" value="${c.phone}">
+                <button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white shadow-xl" onclick="saveCust(${cid})">SAVE</button>
                 <button class="w-full mt-4 text-gray-400 font-bold" onclick="closeModal()">Cancel</button>
-                ${cid ? `<button class="w-full p-4 bg-red-900 rounded-2xl mt-8 font-black text-white text-xs" onclick="deleteFullCust(${cid})">DELETE FULL HISTORY</button>` : ''}
+                ${cid ? `<button class="w-full p-3 bg-red-900 rounded-xl mt-6 font-black text-white text-[10px]" onclick="deleteFullCust(${cid})">DELETE HISTORY</button>` : ''}
             `);
         }
 
         function saveCust(cid) { let n = document.getElementById('cn').value; if(n) { if(cid) { let c = db.customers.find(x=>x.id===cid); c.name = n; c.phone = document.getElementById('cp').value; } else { db.customers.push({id:Date.now(), name:n, phone:document.getElementById('cp').value}); } saveDB(); closeModal(); } }
-        function deleteFullCust(cid) { if(confirm("ഈ കസ്റ്റമറുടെ എല്ലാ വിവരങ്ങളും ഡിലീറ്റ് ചെയ്യണോ?")) { db.customers=db.customers.filter(x=>x.id!==cid); db.trans=db.trans.filter(x=>x.cid!==cid); activeCid=null; saveDB(); closeModal(); } }
+        function deleteFullCust(cid) { if(confirm("Delete History?")) { db.customers=db.customers.filter(x=>x.id!==cid); db.trans=db.trans.filter(x=>x.cid!==cid); activeCid=null; saveDB(); closeModal(); } }
 
         function openAdd(type) {
             openModal(`
-                <h2 class="text-xl font-black mb-6 text-center text-white uppercase">${type}</h2>
-                <input id="ta" type="number" step="0.01" class="w-full p-6 mb-4 rounded-3xl text-4xl text-center text-blue-600 bg-white font-bold" placeholder="₹ 0" autofocus>
+                <h2 class="text-lg font-black mb-4 text-center text-white uppercase">${type}</h2>
+                <input id="ta" type="number" step="0.01" class="w-full p-4 mb-4 rounded-xl text-3xl text-center text-blue-600 font-bold" placeholder="₹ 0" autofocus>
                 <div class="flex gap-2 mb-4">
-                    <button id="mCash" onclick="setM('CASH')" class="flex-1 p-4 rounded-xl border-2 font-bold text-white">CASH</button>
-                    <button id="mUpi" onclick="setM('UPI')" class="flex-1 p-4 rounded-xl border-2 font-bold text-white">UPI</button>
+                    <button id="mCash" onclick="setM('CASH')" class="flex-1 p-3 rounded-lg border font-bold text-xs text-white">CASH</button>
+                    <button id="mUpi" onclick="setM('UPI')" class="flex-1 p-3 rounded-lg border font-bold text-xs text-white">UPI</button>
                 </div>
-                <input id="tr" type="text" class="w-full p-4 rounded-xl mb-4 text-black text-lg font-bold bg-white" placeholder="Remarks">
-                <input id="td" type="date" class="w-full p-4 rounded-xl mb-6 text-black bg-white" value="${getToday()}">
+                <input id="tr" type="text" class="w-full p-4 rounded-xl mb-3 text-black font-bold" placeholder="Remarks">
+                <input id="td" type="date" class="w-full p-4 rounded-xl mb-4 text-black" value="${getToday()}">
                 <input type="hidden" id="tm" value="CASH">
-                <button class="w-full p-5 bg-blue-600 rounded-2xl font-black text-xl text-white shadow-xl" onclick="saveTrans('${type}')">SAVE</button>
-                <button class="w-full mt-4 text-gray-400 font-bold" onclick="closeModal()">Cancel</button>
+                <button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white shadow-xl" onclick="saveTrans('${type}')">SAVE</button>
+                <button class="w-full mt-4 text-gray-400 font-bold text-sm" onclick="closeModal()">Cancel</button>
             `);
             setM('CASH');
         }
 
         function setM(m) {
             document.getElementById('tm').value = m;
-            document.getElementById('mCash').className = m==='CASH' ? 'flex-1 p-4 rounded-xl border-yellow-500 bg-yellow-500 text-black font-bold' : 'flex-1 p-4 rounded-xl border-white/10 bg-white/5 font-bold';
-            document.getElementById('mUpi').className = m==='UPI' ? 'flex-1 p-4 rounded-xl border-blue-500 bg-blue-500 text-white font-bold' : 'flex-1 p-4 rounded-xl border-white/10 bg-white/5 font-bold';
+            document.getElementById('mCash').className = m==='CASH' ? 'flex-1 p-3 rounded-lg border-yellow-500 bg-yellow-500 text-black font-bold text-xs' : 'flex-1 p-3 rounded-lg border-white/10 bg-white/5 font-bold text-xs';
+            document.getElementById('mUpi').className = m==='UPI' ? 'flex-1 p-3 rounded-lg border-blue-500 bg-blue-500 text-white font-bold text-xs' : 'flex-1 p-3 rounded-lg border-white/10 bg-white/5 font-bold text-xs';
         }
 
         function saveTrans(type) { let a=Number(document.getElementById('ta').value), d=document.getElementById('td').value, r=document.getElementById('tr').value, m=document.getElementById('tm').value; if(a && d){ db.trans.push({id:Date.now(), cid:activeCid, type, amt:a, date:d, rem:r, mode:m}); saveDB(); closeModal(); } }
         
         function openSettings() {
             openModal(`
-                <h2 class="text-xl font-black mb-6 text-center text-white">SETTINGS</h2>
-                <input id="upiI" class="w-full p-4 rounded-xl text-black mb-3 font-bold bg-white" value="${db.upi||''}" placeholder="UPI ID">
-                <input id="pinI" class="w-full p-4 rounded-xl text-black mb-6 font-bold bg-white" value="${db.pin}" placeholder="PIN">
-                <button class="w-full p-5 bg-blue-600 rounded-xl font-bold mb-4 text-white" onclick="db.upi=document.getElementById('upiI').value;db.pin=document.getElementById('pinI').value;saveDB();closeModal();">APPLY</button>
-                <button class="w-full text-gray-400 font-bold mb-8" onclick="closeModal()">Close</button>
-                <div class="grid grid-cols-2 gap-3">
-                    <button class="p-4 bg-green-700 rounded-xl text-white font-bold text-xs" onclick="exportData()">BACKUP</button>
-                    <button class="p-4 bg-purple-700 rounded-xl text-white font-bold text-xs" onclick="document.getElementById('imp').click()">RESTORE</button>
+                <h2 class="text-xl font-black mb-4 text-center text-white">SETTINGS</h2>
+                <input id="upiI" class="w-full p-4 rounded-xl text-black mb-3 font-bold" value="${db.upi||''}" placeholder="UPI ID">
+                <input id="pinI" class="w-full p-4 rounded-xl text-black mb-4 font-bold" value="${db.pin}" placeholder="PIN">
+                <button class="w-full p-4 bg-blue-600 rounded-xl font-bold mb-3 text-white" onclick="db.upi=document.getElementById('upiI').value;db.pin=document.getElementById('pinI').value;saveDB();closeModal();">APPLY</button>
+                <button class="w-full text-gray-400 font-bold mb-6 text-sm" onclick="closeModal()">Close</button>
+                <div class="grid grid-cols-2 gap-2">
+                    <button class="p-3 bg-green-700 rounded-lg text-white font-bold text-[10px]" onclick="exportData()">BACKUP</button>
+                    <button class="p-3 bg-purple-700 rounded-lg text-white font-bold text-[10px]" onclick="document.getElementById('imp').click()">RESTORE</button>
                 </div>
                 <input type="file" id="imp" class="hidden" onchange="importData(event)">
             `);
@@ -301,19 +308,19 @@
         function openEditTrans(tid) {
             const t = db.trans.find(x => x.id === tid);
             openModal(`
-                <h2 class="text-xl font-black mb-6 text-center text-white">EDIT ENTRY</h2>
-                <input id="eta" type="number" step="0.01" class="w-full p-5 mb-4 rounded-2xl text-2xl text-center text-blue-600 bg-white font-bold" value="${t.amt}">
-                <input id="etr" type="text" class="w-full p-4 rounded-xl mb-4 text-black font-bold bg-white" value="${t.rem || ''}">
-                <input id="etd" type="date" class="w-full p-4 rounded-xl mb-6 text-black bg-white" value="${t.date}">
-                <button class="w-full p-5 bg-blue-600 rounded-xl font-black text-white mb-3" onclick="updateTrans(${tid})">UPDATE</button>
-                <button class="w-full p-5 bg-red-600 rounded-xl font-black text-white mb-4" onclick="deleteTrans(${tid})">DELETE</button>
-                <button class="w-full text-gray-400 font-bold" onclick="closeModal()">Cancel</button>
+                <h2 class="text-lg font-black mb-4 text-center text-white">EDIT ENTRY</h2>
+                <input id="eta" type="number" step="0.01" class="w-full p-4 mb-3 rounded-xl text-2xl text-center text-blue-600 font-bold" value="${t.amt}">
+                <input id="etr" type="text" class="w-full p-4 rounded-xl mb-3 text-black font-bold" value="${t.rem || ''}">
+                <input id="etd" type="date" class="w-full p-4 rounded-xl mb-4 text-black" value="${t.date}">
+                <button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white mb-2" onclick="updateTrans(${tid})">UPDATE</button>
+                <button class="w-full p-4 bg-red-600 rounded-xl font-black text-white mb-4" onclick="deleteTrans(${tid})">DELETE</button>
+                <button class="w-full text-gray-400 font-bold text-sm" onclick="closeModal()">Cancel</button>
             `);
         }
 
         function updateTrans(tid) { const t=db.trans.find(x=>x.id===tid); t.amt=Number(document.getElementById('eta').value); t.rem=document.getElementById('etr').value; t.date=document.getElementById('etd').value; saveDB(); closeModal(); }
         function deleteTrans(tid) { if(confirm("Delete?")) { db.trans=db.trans.filter(x=>x.id!==tid); saveDB(); closeModal(); } }
-        function openPromiseModal() { openModal(`<h2 class="text-xl font-black mb-6 text-center text-white">ADD PROMISE</h2><input id="pa" type="number" step="0.01" class="w-full p-5 rounded-2xl mb-4 text-black font-bold bg-white" placeholder="Amount"><input id="pd" type="date" class="w-full p-5 rounded-2xl mb-6 text-black bg-white" value="${getToday()}"><button class="w-full p-5 bg-blue-600 rounded-2xl font-black text-white" onclick="savePromise()">SET PROMISE</button><button class="w-full mt-4 text-gray-400 font-bold" onclick="closeModal()">Cancel</button>`); }
+        function openPromiseModal() { openModal(`<h2 class="text-lg font-black mb-4 text-center text-white">ADD PROMISE</h2><input id="pa" type="number" step="0.01" class="w-full p-4 rounded-xl mb-3 text-black font-bold" placeholder="Amount"><input id="pd" type="date" class="w-full p-4 rounded-xl mb-4 text-black" value="${getToday()}"><button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white" onclick="savePromise()">SET PROMISE</button><button class="w-full mt-4 text-gray-400 font-bold text-sm" onclick="closeModal()">Cancel</button>`); }
         function savePromise() { let a=document.getElementById('pa').value, d=document.getElementById('pd').value; if(a&&d){ db.promises.push({id:Date.now(), cid:activeCid, amt:a, date:d}); saveDB(); closeModal(); } }
         function settlePromise(id) { const p=db.promises.find(x=>x.id===id); db.trans.push({id:Date.now(), cid:p.cid, type:'GOT', amt:Number(p.amt), date:getToday(), mode:'CASH', rem:'Promise Paid'}); db.promises=db.promises.filter(x=>x.id!==id); saveDB(); }
 
@@ -321,10 +328,10 @@
             openModal(`
                 <h2 class="mb-4 font-bold text-center text-white">GENERATE REPORT</h2>
                 <div class="space-y-4">
-                    <input id="ps" type="date" class="w-full p-4 rounded-xl text-black bg-white" value="2026-01-01">
-                    <input id="pe" type="date" class="w-full p-4 rounded-xl text-black bg-white" value="${getToday()}">
-                    <button class="w-full p-5 bg-blue-600 rounded-2xl font-black text-white shadow-xl" onclick="generatePDF()">DOWNLOAD PDF</button>
-                    <button class="w-full text-gray-400 font-bold" onclick="closeModal()">Close</button>
+                    <input id="ps" type="date" class="w-full p-4 rounded-xl text-black" value="2026-01-01">
+                    <input id="pe" type="date" class="w-full p-4 rounded-xl text-black" value="${getToday()}">
+                    <button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white shadow-xl" onclick="generatePDF()">DOWNLOAD PDF</button>
+                    <button class="w-full text-gray-400 font-bold text-sm" onclick="closeModal()">Close</button>
                 </div>
             `);
         }
@@ -332,27 +339,27 @@
         function generatePDF() {
             const s=document.getElementById('ps').value, e=document.getElementById('pe').value, cust=db.customers.find(c=>c.id===activeCid);
             const filtered=db.trans.filter(t=>t.cid===activeCid && t.date>=s && t.date<=e).sort((a,b)=>new Date(a.date)-new Date(b.date));
-            const el=document.createElement('div'); el.style.padding="30px"; el.style.background="#fff"; el.style.color="#000"; el.style.fontSize="12px";
+            const el=document.createElement('div'); el.style.padding="20px"; el.style.background="#fff"; el.style.color="#000"; el.style.fontSize="10px";
             let rt=0;
-            let rows=filtered.map(t=>{ rt+=(t.type==='GAVE'?t.amt:-t.amt); return `<tr><td style="border:1px solid #ddd;padding:8px">${fmtDate(t.date)}<br><small>${t.rem||''}</small></td><td style="border:1px solid #ddd;padding:8px;color:red">${t.type==='GAVE'?'₹'+t.amt.toFixed(2):'-'}</td><td style="border:1px solid #ddd;padding:8px;color:green">${t.type==='GOT'?'₹'+t.amt.toFixed(2):'-'}</td><td style="border:1px solid #ddd;padding:8px">${t.mode||'CASH'}</td><td style="border:1px solid #ddd;padding:8px;font-weight:bold">₹${rt.toFixed(2)}</td></tr>`; }).join('');
-            el.innerHTML=`<h2 style="text-align:center;margin-bottom:10px">${cust.name} - Statement</h2><p style="text-align:center;margin-bottom:20px">${fmtDate(s)} to ${fmtDate(e)}</p><table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f2f2f2"><th>Date</th><th>Gave</th><th>Got</th><th>Mode</th><th>Balance</th></tr></thead><tbody>${rows}</tbody></table>`;
-            html2pdf().set({ margin: 1, filename: `${cust.name}_Statement.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).from(el).save();
+            let rows=filtered.map(t=>{ rt+=(t.type==='GAVE'?t.amt:-t.amt); return `<tr><td style="border:1px solid #ddd;padding:5px">${fmtDate(t.date)}</td><td style="border:1px solid #ddd;padding:5px;color:red">${t.type==='GAVE'?t.amt.toFixed(2):'-'}</td><td style="border:1px solid #ddd;padding:5px;color:green">${t.type==='GOT'?t.amt.toFixed(2):'-'}</td><td style="border:1px solid #ddd;padding:5px">${t.mode||'CASH'}</td><td style="border:1px solid #ddd;padding:5px;font-weight:bold">₹${rt.toFixed(2)}</td></tr>`; }).join('');
+            el.innerHTML=`<h3 style="text-align:center">${cust.name} - Statement</h3><table style="width:100%;border-collapse:collapse;margin-top:10px"><thead><tr style="background:#f2f2f2"><th>Date</th><th>Gave</th><th>Got</th><th>Mode</th><th>Bal</th></tr></thead><tbody>${rows}</tbody></table>`;
+            html2pdf().set({ margin: 0.5, filename: `${cust.name}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).from(el).save();
         }
 
         function openQR(amt) {
             if(!db.upi) return alert("Settings-ൽ UPI ID നൽകുക");
             const cust = db.customers.find(c => c.id === activeCid);
             openModal(`
-                <div class="bg-white p-6 rounded-[2.5rem] flex flex-col items-center">
-                    <div id="qr" class="mb-4"></div>
-                    <p class="text-black font-black text-3xl">₹${Number(amt).toFixed(2)}</p>
-                    <div class="w-full mt-6 space-y-2">
-                        <button onclick="shareWA('${cust ? cust.phone : ''}', ${amt})" class="w-full p-4 rounded-xl bg-green-600 text-white font-bold"><i class="fa-brands fa-whatsapp"></i> WhatsApp Share</button>
-                        <button onclick="closeModal()" class="w-full p-4 rounded-xl bg-red-500 text-white font-bold">Close</button>
+                <div class="bg-white p-4 rounded-3xl flex flex-col items-center">
+                    <div id="qr" class="mb-3"></div>
+                    <p class="text-black font-black text-2xl">₹${Number(amt).toFixed(2)}</p>
+                    <div class="w-full mt-4 space-y-2">
+                        <button onclick="shareWA('${cust ? cust.phone : ''}', ${amt})" class="w-full p-3 rounded-lg bg-green-600 text-white font-bold text-sm"><i class="fa-brands fa-whatsapp"></i> WhatsApp Share</button>
+                        <button onclick="closeModal()" class="w-full p-3 rounded-lg bg-red-500 text-white font-bold text-sm">Close</button>
                     </div>
                 </div>
             `);
-            new QRCode(document.getElementById("qr"), { text: `upi://pay?pa=${db.upi}&am=${amt}&cu=INR`, width: 220, height: 220 });
+            new QRCode(document.getElementById("qr"), { text: `upi://pay?pa=${db.upi}&am=${amt}&cu=INR`, width: 180, height: 180 });
         }
 
         function shareWA(p, b) { if(!p) return alert("Phone Number Missing"); const msg = `നിങ്ങളുടെ ബാക്കി തുക: ₹${Math.abs(b).toFixed(2)}. ദയവായി പരിശോധിക്കുക.`; window.open(`https://wa.me/91${p}?text=${encodeURIComponent(msg)}`); }
@@ -367,7 +374,7 @@
     </script>
 
     <div id="modalOverlay" class="fixed inset-0 bg-black/80 hidden z-[1000] items-end justify-center p-4" onclick="closeModal()">
-        <div id="modalBox" class="w-full max-w-[420px] bg-[#161b2e] p-6 rounded-t-[3rem] text-white overflow-y-auto max-h-[85vh] relative shadow-2xl" onclick="event.stopPropagation()"></div>
+        <div id="modalBox" class="w-full max-w-[420px] bg-[#161b2e] p-5 rounded-t-3xl text-white overflow-y-auto max-h-[85vh] relative" onclick="event.stopPropagation()"></div>
     </div>
 </body>
-            </html>
+</html>
