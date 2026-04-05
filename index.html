@@ -22,7 +22,7 @@
         body.light-mode .card-bg { background: white; border: 1px solid #e2e8f0; }
 
         .header-custom { background-color: var(--header-gold); padding: 12px 16px; color: black; }
-        .icon-btn-box { background: rgba(0,0,0,0.1); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: none; }
+        .icon-btn-box { background: rgba(0,0,0,0.1); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: none; }
         
         .yellow-card-premium { 
             background: linear-gradient(180deg, var(--brand-yellow) 0%, #eab308 100%); 
@@ -36,8 +36,6 @@
         .summary-label { font-size: 8px; font-weight: 800; opacity: 0.6; text-transform: uppercase; }
         .summary-value { font-size: 13px; font-weight: 900; }
 
-        /* TABLE ADJUSTMENTS FOR ONE LINE */
-        .table-container { width: 100%; }
         .trans-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         .trans-table th { font-size: 8px; opacity: 0.6; padding: 8px 2px; text-align: left; text-transform: uppercase; border-bottom: 1px solid rgba(0,0,0,0.1); }
         .trans-table td { padding: 10px 2px; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; }
@@ -62,21 +60,21 @@
         <div class="grid grid-cols-3 gap-4 w-full max-w-[280px]">
             <script>for(let i=1;i<=9;i++) document.write(`<button class="aspect-square rounded-2xl bg-white/5 text-2xl font-bold text-white active:bg-blue-600" onclick="pressKey('${i}')">${i}</button>`);</script>
             <button class="text-blue-400 font-bold" onclick="currentPinInput='';updateDots()">CLR</button>
-            <button class="aspect-square rounded-2xl bg-white/5 text-2xl font-bold text-white active:bg-blue-600" onclick="pressKey('0')">${0}</button>
+            <button class="aspect-square rounded-2xl bg-white/5 text-2xl font-bold text-white active:bg-blue-600" onclick="pressKey('0')">0</button>
             <button class="text-red-500 font-bold text-[10px]" onclick="resetPin()">RESET</button>
         </div>
     </div>
 
     <div class="app w-full max-w-[480px] mx-auto min-h-screen flex flex-col" id="mainApp" style="display:none;">
         <header class="header-custom flex justify-between items-center sticky top-0 z-50">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 overflow-hidden">
                 <button id="backBtn" onclick="goHome()" class="hidden text-black text-xl"><i class="fa-solid fa-arrow-left"></i></button>
-                <h1 id="pageTitle" onclick="handleTitleClick()" class="text-lg font-black truncate">KHATA PRO</h1>
+                <h1 id="pageTitle" class="text-lg font-black truncate max-w-[150px]">KHATA PRO</h1>
             </div>
             <div class="flex gap-1">
+                <button id="custEditBtn" onclick="openCustModal(activeCid)" class="hidden icon-btn-box text-blue-900"><i class="fa-solid fa-user-pen"></i></button>
                 <button onclick="toggleTheme()" class="icon-btn-box text-black"><i id="themeIcon" class="fa-solid fa-sun"></i></button>
                 <button onclick="lockApp()" class="icon-btn-box text-red-900"><i class="fa-solid fa-lock"></i></button>
-                <button id="custEditBtn" class="hidden icon-btn-box text-blue-900"><i class="fa-solid fa-user-pen"></i></button>
                 <button onclick="openSettings()" class="icon-btn-box text-black"><i class="fa-solid fa-gear"></i></button>
             </div>
         </header>
@@ -86,7 +84,7 @@
             <div id="topArea"></div>
             <div id="dailyRow" class="grid grid-cols-2 gap-2 mb-4 hidden"></div>
             <div id="searchBox" class="mb-4"></div>
-            <div id="mainContent" class="table-container"></div>
+            <div id="mainContent"></div>
         </main>
         
         <div id="footerActions" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] p-6 rounded-t-[2.5rem] bg-black/40 backdrop-blur-xl"></div>
@@ -113,8 +111,6 @@
             document.getElementById('themeIcon').className = db.darkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
             activeCid ? renderDetails() : renderHome(); 
         }
-
-        function handleTitleClick() { if(activeCid) openCustModal(activeCid); }
 
         function renderHome() {
             activeCid = null;
@@ -222,12 +218,12 @@
                 <input id="cp" type="number" class="w-full p-4 rounded-xl mb-4 text-black font-bold" placeholder="Phone" value="${c.phone}">
                 <button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white" onclick="saveCust(${cid})">SAVE</button>
                 <button class="w-full mt-4 text-gray-400 font-bold" onclick="closeModal()">Cancel</button>
-                ${cid ? `<button class="w-full p-3 bg-red-900 rounded-xl mt-6 font-black text-white text-[10px]" onclick="deleteFullCust(${cid})">DELETE HISTORY</button>` : ''}
+                ${cid ? `<button class="w-full p-3 bg-red-900 rounded-xl mt-6 font-black text-white text-[12px]" onclick="deleteFullCust(${cid})"><i class="fa-solid fa-trash-can mr-2"></i> DELETE CUSTOMER & HISTORY</button>` : ''}
             `);
         }
 
         function saveCust(cid) { let n = document.getElementById('cn').value; if(n) { if(cid) { let c = db.customers.find(x=>x.id===cid); c.name = n; c.phone = document.getElementById('cp').value; } else { db.customers.push({id:Date.now(), name:n, phone:document.getElementById('cp').value}); } saveDB(); closeModal(); } }
-        function deleteFullCust(cid) { if(confirm("Delete History?")) { db.customers=db.customers.filter(x=>x.id!==cid); db.trans=db.trans.filter(x=>x.cid!==cid); activeCid=null; saveDB(); closeModal(); } }
+        function deleteFullCust(cid) { if(confirm("ഈ കസ്റ്റമറെയും എല്ലാ ഇടപാടുകളും ഡിലീറ്റ് ചെയ്യണോ?")) { db.customers=db.customers.filter(x=>x.id!==cid); db.trans=db.trans.filter(x=>x.cid!==cid); activeCid=null; saveDB(); closeModal(); } }
 
         function openAdd(type) {
             openModal(`
@@ -259,15 +255,18 @@
                 <h2 class="text-xl font-black mb-4 text-center text-white">SETTINGS</h2>
                 <input id="upiI" class="w-full p-4 rounded-xl text-black mb-3 font-bold" value="${db.upi||''}" placeholder="UPI ID">
                 <input id="pinI" class="w-full p-4 rounded-xl text-black mb-4 font-bold" value="${db.pin}" placeholder="PIN">
-                <button class="w-full p-4 bg-blue-600 rounded-xl font-bold mb-3 text-white" onclick="db.upi=document.getElementById('upiI').value;db.pin=document.getElementById('pinI').value;saveDB();closeModal();">APPLY</button>
-                <button class="w-full text-gray-400 font-bold mb-6 text-sm" onclick="closeModal()">Close</button>
-                <div class="grid grid-cols-2 gap-2">
+                <button class="w-full p-4 bg-blue-600 rounded-xl font-bold mb-3 text-white" onclick="db.upi=document.getElementById('upiI').value;db.pin=document.getElementById('pinI').value;saveDB();closeModal();">APPLY CHANGES</button>
+                <div class="grid grid-cols-2 gap-2 mb-6">
                     <button class="p-3 bg-green-700 rounded-lg text-white font-bold text-[10px]" onclick="exportData()">BACKUP</button>
                     <button class="p-3 bg-purple-700 rounded-lg text-white font-bold text-[10px]" onclick="document.getElementById('imp').click()">RESTORE</button>
                 </div>
+                <button class="w-full p-3 bg-red-600 rounded-xl font-black text-white text-[12px] mb-4" onclick="resetAllData()"><i class="fa-solid fa-triangle-exclamation mr-2"></i> DELETE ALL DATA (RESET)</button>
+                <button class="w-full text-gray-400 font-bold text-sm" onclick="closeModal()">Close</button>
                 <input type="file" id="imp" class="hidden" onchange="importData(event)">
             `);
         }
+
+        function resetAllData() { if(confirm("മുന്നറിയിപ്പ്: എല്ലാ കസ്റ്റമർ വിവരങ്ങളും ഇടപാടുകളും എന്നെന്നേക്കുമായി ഡിലീറ്റ് ചെയ്യപ്പെടും. തുടരണോ?")) { localStorage.removeItem(STORAGE_ID); location.reload(); } }
 
         function openEditTrans(tid) {
             const t = db.trans.find(x => x.id === tid);
@@ -277,16 +276,18 @@
                 <input id="etr" type="text" class="w-full p-4 rounded-xl mb-3 text-black font-bold" value="${t.rem || ''}">
                 <input id="etd" type="date" class="w-full p-4 rounded-xl mb-4 text-black" value="${t.date}">
                 <button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white mb-2" onclick="updateTrans(${tid})">UPDATE</button>
-                <button class="w-full p-4 bg-red-600 rounded-xl font-black text-white mb-4" onclick="deleteTrans(${tid})">DELETE</button>
+                <button class="w-full p-4 bg-red-600 rounded-xl font-black text-white mb-4" onclick="deleteTrans(${tid})">DELETE ENTRY</button>
                 <button class="w-full text-gray-400 font-bold text-sm" onclick="closeModal()">Cancel</button>
             `);
         }
 
         function updateTrans(tid) { const t=db.trans.find(x=>x.id===tid); t.amt=Number(document.getElementById('eta').value); t.rem=document.getElementById('etr').value; t.date=document.getElementById('etd').value; saveDB(); closeModal(); }
-        function deleteTrans(tid) { if(confirm("Delete?")) { db.trans=db.trans.filter(x=>x.id!==tid); saveDB(); closeModal(); } }
+        function deleteTrans(tid) { if(confirm("ഈ എൻട്രി ഡിലീറ്റ് ചെയ്യണോ?")) { db.trans=db.trans.filter(x=>x.id!==tid); saveDB(); closeModal(); } }
+        
         function openPromiseModal() { openModal(`<h2 class="text-lg font-black mb-4 text-center text-white">ADD PROMISE</h2><input id="pa" type="number" step="0.01" class="w-full p-4 rounded-xl mb-3 text-black font-bold" placeholder="Amount"><input id="pd" type="date" class="w-full p-4 rounded-xl mb-4 text-black" value="${getToday()}"><button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white" onclick="savePromise()">SET PROMISE</button><button class="w-full mt-4 text-gray-400 font-bold text-sm" onclick="closeModal()">Cancel</button>`); }
         function savePromise() { let a=document.getElementById('pa').value, d=document.getElementById('pd').value; if(a&&d){ db.promises.push({id:Date.now(), cid:activeCid, amt:a, date:d}); saveDB(); closeModal(); } }
         function settlePromise(id) { const p=db.promises.find(x=>x.id===id); db.trans.push({id:Date.now(), cid:p.cid, type:'GOT', amt:Number(p.amt), date:getToday(), mode:'CASH', rem:'Promise Paid'}); db.promises=db.promises.filter(x=>x.id!==id); saveDB(); }
+        function deletePromise(id) { if(confirm("Delete Promise?")) { db.promises=db.promises.filter(x=>x.id!==id); saveDB(); } }
 
         function openPDFModal() {
             openModal(`
