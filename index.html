@@ -11,47 +11,53 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         
-        * { 
-            margin: 0; padding: 0; box-sizing: border-box; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            -webkit-tap-highlight-color: transparent; 
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         
         :root { --brand-yellow: #facc15; --header-gold: #b58916; }
         
         body { overflow-x: hidden; width: 100%; }
 
+        /* Dark Mode */
         body.dark-mode { background: #1a3c30; color: #f8fafc; }
         body.dark-mode .card-bg { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
         body.dark-mode .input-field { background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.1); }
         
+        /* Light Mode */
         body.light-mode { background: #f1f5f9; color: #0f172a; }
         body.light-mode .card-bg { background: white; border: 1px solid #e2e8f0; color: #0f172a; }
         body.light-mode .input-field { background: white; color: black; border: 1px solid #cbd5e1; }
         body.light-mode .text-white-fixed { color: #0f172a; }
 
-        .header-custom { background-color: var(--header-gold); padding: 10px 16px; color: black; height: 60px; }
-        .icon-btn-box { background: rgba(0,0,0,0.1); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: none; }
+        .header-custom { background-color: var(--header-gold); padding: 8px 12px; color: black; height: 56px; }
+        .icon-btn-box { background: rgba(0,0,0,0.1); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: none; }
         
         .yellow-card { 
             background-color: var(--brand-yellow); color: black; 
-            margin: -16px -16px 20px -16px; padding: 25px 16px; 
-            border-bottom-left-radius: 2.5rem; border-bottom-right-radius: 2.5rem; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
+            margin: -16px -16px 15px -16px; padding: 20px 12px; 
+            border-bottom-left-radius: 2rem; border-bottom-right-radius: 2rem; 
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1); 
         }
         
-        /* Mobile Optimized Table */
-        .table-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .trans-table { width: 100%; border-collapse: collapse; min-width: 350px; }
-        .trans-table th { font-size: 10px; opacity: 0.6; padding: 12px 6px; text-align: left; text-transform: uppercase; border-bottom: 1px solid rgba(0,0,0,0.1); }
-        .trans-table td { padding: 14px 6px; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 13px; font-weight: 700; }
+        /* Fixed Mobile Table */
+        .table-container { width: 100%; overflow-x: hidden; }
+        .trans-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .trans-table th { font-size: 9px; opacity: 0.6; padding: 8px 4px; text-align: left; text-transform: uppercase; border-bottom: 1px solid rgba(0,0,0,0.1); }
+        .trans-table td { padding: 12px 4px; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 12px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         
-        .rem-info { font-size: 10px; color: #b58916; display: block; font-weight: 600; margin-top: 2px; }
-        .mode-badge { font-size: 9px; padding: 2px 5px; border-radius: 4px; background: rgba(0,0,0,0.05); font-weight: 800; }
+        /* Responsive Columns Width */
+        .col-date { width: 22%; }
+        .col-amt { width: 20%; }
+        .col-mode { width: 16%; }
+        .col-bal { width: 22%; text-align: right; }
 
-        /* Smooth Transitions */
-        .app { transition: all 0.3s ease; }
-        button:active { transform: scale(0.96); }
+        .rem-info { font-size: 9px; color: #b58916; display: block; font-weight: 600; margin-top: 1px; overflow: hidden; text-overflow: ellipsis; }
+        .mode-badge { font-size: 8px; padding: 2px 4px; border-radius: 4px; background: rgba(0,0,0,0.05); font-weight: 800; }
+
+        /* Small Screen Adjustments */
+        @media (max-width: 360px) {
+            .trans-table td { font-size: 11px; }
+            .yellow-card h2 { font-size: 2rem; }
+        }
     </style>
 </head>
 <body class="dark-mode">
@@ -76,12 +82,12 @@
     </div>
 
     <div class="app w-full max-w-[480px] mx-auto min-h-screen flex flex-col relative" id="mainApp" style="display:none;">
-        <header class="header-custom flex justify-between items-center sticky top-0 z-50 shadow-md">
+        <header class="header-custom flex justify-between items-center sticky top-0 z-50 shadow-sm">
             <div class="flex items-center gap-2">
                 <button id="backBtn" onclick="goHome()" class="hidden text-black text-xl px-2"><i class="fa-solid fa-arrow-left"></i></button>
-                <h1 id="pageTitle" onclick="handleTitleClick()" class="text-lg font-black truncate max-w-[150px]">KHATA PRO</h1>
+                <h1 id="pageTitle" onclick="handleTitleClick()" class="text-base font-black truncate max-w-[140px]">KHATA PRO</h1>
             </div>
-            <div class="flex gap-1.5">
+            <div class="flex gap-1">
                 <button onclick="toggleTheme()" class="icon-btn-box text-black"><i id="themeIcon" class="fa-solid fa-sun text-sm"></i></button>
                 <button onclick="lockApp()" class="icon-btn-box text-red-900"><i class="fa-solid fa-lock text-sm"></i></button>
                 <button id="custEditBtn" class="hidden icon-btn-box text-blue-900"><i class="fa-solid fa-user-pen text-sm"></i></button>
@@ -89,11 +95,11 @@
             </div>
         </header>
 
-        <main class="flex-1 p-4 pb-32">
-            <div id="promiseHeader" class="mb-4 space-y-2"></div>
+        <main class="flex-1 p-3 pb-32">
+            <div id="promiseHeader" class="mb-3 space-y-2"></div>
             <div id="topArea"></div>
-            <div id="dailyRow" class="grid grid-cols-2 gap-2 mb-4 hidden"></div>
-            <div id="searchBox" class="mb-4"></div>
+            <div id="dailyRow" class="grid grid-cols-2 gap-2 mb-3 hidden"></div>
+            <div id="searchBox" class="mb-3"></div>
             <div id="mainContent" class="w-full"></div>
         </main>
         
@@ -136,8 +142,8 @@
 
             document.getElementById('topArea').innerHTML = `
                 <div class="yellow-card text-center">
-                    <p class="text-[10px] font-extrabold opacity-60 uppercase tracking-widest">Net Balance</p>
-                    <h2 class="text-4xl font-black mt-1">₹${(tGave-tGot).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h2>
+                    <p class="text-[9px] font-extrabold opacity-60 uppercase tracking-widest">Net Balance</p>
+                    <h2 class="text-3xl font-black mt-1">₹${(tGave-tGot).toLocaleString('en-IN', {minimumFractionDigits: 2})}</h2>
                 </div>`;
             
             document.getElementById('searchBox').innerHTML = `<input type="text" oninput="searchQuery=this.value;renderList()" placeholder="Search clients..." class="input-field w-full p-4 rounded-xl outline-none font-bold text-sm">`;
@@ -164,39 +170,53 @@
                 if(t.date === today && t.type === 'GOT') { if(t.mode==='UPI') uToday += t.amt; else cToday += t.amt; }
                 
                 return `<tr onclick="openEditTrans(${t.id})">
-                    <td>${fmtDate(t.date)} <span class="rem-info">${t.rem || ''}</span></td>
-                    <td class="text-red-500">₹${t.type==='GAVE'?t.amt.toFixed(2):'-'}</td>
-                    <td class="text-green-500">₹${t.type==='GOT'?t.amt.toFixed(2):'-'}</td>
-                    <td><span class="mode-badge ${t.mode==='UPI'?'text-blue-500':'text-green-600'}">${t.mode || 'CASH'}</span></td>
-                    <td class="text-right">₹${rb.toFixed(2)}</td>
+                    <td class="col-date">${fmtDate(t.date)} <span class="rem-info">${t.rem || ''}</span></td>
+                    <td class="col-amt text-red-500">₹${t.type==='GAVE'?t.amt.toFixed(2):'-'}</td>
+                    <td class="col-amt text-green-500">₹${t.type==='GOT'?t.amt.toFixed(2):'-'}</td>
+                    <td class="col-mode"><span class="mode-badge ${t.mode==='UPI'?'text-blue-500':'text-green-600'}">${t.mode || 'CASH'}</span></td>
+                    <td class="col-bal">₹${rb.toFixed(2)}</td>
                 </tr>`;
             }).reverse().join('');
 
             document.getElementById('topArea').innerHTML = `
                 <div class="yellow-card">
-                    <div class="flex justify-between gap-2 mb-6">
+                    <div class="flex justify-between gap-2 mb-4">
                         <button onclick="shareWA('${cust.phone}', ${rb.toFixed(2)})" class="flex-1 bg-black/5 h-10 rounded-lg flex items-center justify-center"><i class="fa-brands fa-whatsapp text-xl text-green-800"></i></button>
                         <button onclick="openQR(${Math.abs(rb).toFixed(2)})" class="flex-1 bg-black/5 h-10 rounded-lg flex items-center justify-center"><i class="fa-solid fa-qrcode text-xl text-purple-800"></i></button>
                         <button onclick="openPDFModal()" class="flex-1 bg-black/5 h-10 rounded-lg flex items-center justify-center"><i class="fa-solid fa-file-pdf text-xl text-blue-800"></i></button>
                         <button onclick="openPromiseModal()" class="flex-1 bg-black/5 h-10 rounded-lg flex items-center justify-center"><i class="fa-solid fa-calendar-check text-xl text-orange-900"></i></button>
                     </div>
-                    <div class="text-center mb-6">
+                    <div class="text-center mb-4">
                         <p class="text-[9px] font-black opacity-60 uppercase">Total Balance</p>
-                        <h2 class="text-4xl font-black">₹${Math.abs(rb).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h2>
+                        <h2 class="text-3xl font-black">₹${Math.abs(rb).toLocaleString('en-IN', {minimumFractionDigits: 2})}</h2>
                     </div>
                     <div class="bg-black/5 rounded-xl p-3 flex justify-between">
-                        <div class="text-center flex-1 border-r border-black/5"><p class="text-[9px] font-black text-red-700">GAVE</p><p class="text-sm font-black">₹${mGave.toFixed(2)}</p></div>
-                        <div class="text-center flex-1 border-r border-black/5"><p class="text-[9px] font-black text-green-800">GOT</p><p class="text-sm font-black">₹${mGot.toFixed(2)}</p></div>
-                        <div class="text-center flex-1"><p class="text-[9px] font-black">NET</p><p class="text-sm font-black">₹${(mGave - mGot).toFixed(2)}</p></div>
+                        <div class="text-center flex-1 border-r border-black/5"><p class="text-[8px] font-black text-red-700">GAVE</p><p class="text-xs font-black">₹${mGave.toFixed(2)}</p></div>
+                        <div class="text-center flex-1 border-r border-black/5"><p class="text-[8px] font-black text-green-800">GOT</p><p class="text-xs font-black">₹${mGot.toFixed(2)}</p></div>
+                        <div class="text-center flex-1"><p class="text-[8px] font-black">NET</p><p class="text-xs font-black">₹${(mGave - mGot).toFixed(2)}</p></div>
                     </div>
                 </div>`;
 
             document.getElementById('dailyRow').innerHTML = `
-                <div class="card-bg p-3 rounded-xl text-center"><p class="text-[8px] font-black opacity-60">CASH TODAY</p><p class="text-green-500 font-black text-sm">₹${cToday.toFixed(2)}</p></div>
-                <div class="card-bg p-3 rounded-xl text-center"><p class="text-[8px] font-black opacity-60">UPI TODAY</p><p class="text-blue-500 font-black text-sm">₹${uToday.toFixed(2)}</p></div>
+                <div class="card-bg p-3 rounded-xl text-center"><p class="text-[8px] font-black opacity-60">CASH TODAY</p><p class="text-green-500 font-black text-xs">₹${cToday.toFixed(2)}</p></div>
+                <div class="card-bg p-3 rounded-xl text-center"><p class="text-[8px] font-black opacity-60">UPI TODAY</p><p class="text-blue-500 font-black text-xs">₹${uToday.toFixed(2)}</p></div>
             `;
 
-            document.getElementById('mainContent').innerHTML = `<div class="table-container"><table class="trans-table"><thead><tr><th>Date</th><th>Gave</th><th>Got</th><th>Method</th><th class="text-right">Bal</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+            document.getElementById('mainContent').innerHTML = `
+                <div class="table-container">
+                    <table class="trans-table">
+                        <thead>
+                            <tr>
+                                <th class="col-date">Date</th>
+                                <th class="col-amt">Gave</th>
+                                <th class="col-amt">Got</th>
+                                <th class="col-mode">Mode</th>
+                                <th class="col-bal">Bal</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>`;
             document.getElementById('footerActions').innerHTML = `<div class="flex gap-3"><button class="flex-1 p-4 bg-red-600 rounded-xl font-black text-white text-lg shadow-lg" onclick="openAdd('GAVE')">GAVE</button><button class="flex-1 p-4 bg-green-600 rounded-xl font-black text-white text-lg shadow-lg" onclick="openAdd('GOT')">GOT</button></div>`;
         }
 
@@ -205,7 +225,7 @@
             let html = `<div class="space-y-2">`;
             filtered.forEach(c => {
                 let bal = 0; db.trans.filter(t => t.cid === c.id).forEach(t => bal += (t.type==='GAVE' ? t.amt : -t.amt));
-                html += `<div class="flex items-center p-3 rounded-xl card-bg" onclick="openCustomer(${c.id})"><div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-black text-white text-sm">${c.name[0]}</div><div class="flex-1 ml-3"><p class="font-bold text-sm text-white-fixed truncate">${c.name}</p></div><div class="text-right"><p class="font-black text-sm ${bal>=0?'text-red-500':'text-green-500'}">₹${Math.abs(bal).toFixed(2)}</p></div></div>`;
+                html += `<div class="flex items-center p-3 rounded-xl card-bg" onclick="openCustomer(${c.id})"><div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-black text-white text-sm">${c.name[0]}</div><div class="flex-1 ml-3 truncate"><p class="font-bold text-sm text-white-fixed truncate">${c.name}</p></div><div class="text-right ml-2"><p class="font-black text-sm ${bal>=0?'text-red-500':'text-green-500'}">₹${Math.abs(bal).toFixed(2)}</p></div></div>`;
             });
             document.getElementById('mainContent').innerHTML = html + `</div>`;
         }
@@ -215,8 +235,8 @@
             db.promises.forEach(p => {
                 const c = db.customers.find(x => x.id === p.cid); if(!c) return;
                 h += `<div class="p-3 rounded-xl flex justify-between items-center mb-2 card-bg" onclick="openCustomer(${c.id})">
-                    <div class="flex-1 text-left"><h3 class="font-bold text-xs text-white-fixed">${c.name}: ₹${p.amt}</h3><p class="text-[9px] opacity-60">Due: ${fmtDate(p.date)}</p></div>
-                    <div class="flex gap-2">
+                    <div class="flex-1 text-left truncate"><h3 class="font-bold text-xs text-white-fixed truncate">${c.name}: ₹${p.amt}</h3><p class="text-[9px] opacity-60">Due: ${fmtDate(p.date)}</p></div>
+                    <div class="flex gap-2 ml-2">
                         <button onclick="event.stopPropagation();settlePromise(${p.id})" class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center text-white text-xs"><i class="fa-solid fa-check"></i></button>
                         <button onclick="event.stopPropagation();deletePromise(${p.id})" class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white text-xs"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
@@ -225,7 +245,7 @@
             document.getElementById('promiseHeader').innerHTML = h;
         }
 
-        // Modal, Settings, Trans Actions (Keeping the same functional logic but with better mobile styling)
+        // Global Modals and Helpers
         function openModal(h) { 
             document.getElementById('modalBox').innerHTML=h; 
             document.getElementById('modalOverlay').style.display='flex'; 
@@ -254,7 +274,7 @@
         function openAdd(type) {
             openModal(`
                 <h2 class="text-lg font-black mb-4 text-center text-white uppercase">${type}</h2>
-                <input id="ta" type="number" step="0.01" class="w-full p-4 mb-3 rounded-xl text-3xl text-center text-blue-600 bg-white font-bold" placeholder="₹ 0" autofocus>
+                <input id="ta" type="number" step="0.01" class="w-full p-4 mb-3 rounded-xl text-2xl text-center text-blue-600 bg-white font-bold" placeholder="₹ 0" autofocus>
                 <div class="flex gap-2 mb-3">
                     <button id="mCash" onclick="setM('CASH')" class="flex-1 p-3 rounded-lg border-2 font-bold text-xs text-white">CASH</button>
                     <button id="mUpi" onclick="setM('UPI')" class="flex-1 p-3 rounded-lg border-2 font-bold text-xs text-white">UPI</button>
@@ -282,32 +302,22 @@
                 <input id="upiI" class="w-full p-3 rounded-lg text-black mb-2 font-bold bg-white text-sm" value="${db.upi||''}" placeholder="UPI ID">
                 <input id="pinI" class="w-full p-3 rounded-lg text-black mb-4 font-bold bg-white text-sm" value="${db.pin}" placeholder="PIN">
                 <button class="w-full p-3 bg-blue-600 rounded-lg font-bold mb-4 text-white text-sm" onclick="db.upi=document.getElementById('upiI').value;db.pin=document.getElementById('pinI').value;saveDB();closeModal();">APPLY</button>
-                
                 <div class="grid grid-cols-2 gap-2 mb-4">
                     <button class="p-3 bg-green-700 rounded-lg text-white font-bold text-[10px]" onclick="exportData()">BACKUP</button>
                     <button class="p-3 bg-purple-700 rounded-lg text-white font-bold text-[10px]" onclick="document.getElementById('imp').click()">RESTORE</button>
                 </div>
-                
-                <button class="w-full p-3 bg-red-600 rounded-lg text-white font-black text-xs mb-4" onclick="deleteAllData()">
-                    <i class="fa-solid fa-trash-can mr-1"></i> ALL DELETE (WIPE ALL)
-                </button>
-                
+                <button class="w-full p-3 bg-red-600 rounded-lg text-white font-black text-xs mb-4" onclick="deleteAllData()">ALL DELETE</button>
                 <button class="w-full text-gray-400 font-bold text-sm" onclick="closeModal()">Close</button>
                 <input type="file" id="imp" class="hidden" onchange="importData(event)">
             `);
         }
 
-        function deleteAllData() {
-            if(confirm("ശ്രദ്ധിക്കുക: എല്ലാ വിവരങ്ങളും ഡിലീറ്റ് ചെയ്യപ്പെടും. തുടരണോ?")) {
-                db.customers = []; db.trans = []; db.promises = []; activeCid = null; saveDB(); alert("Deleted!"); closeModal();
-            }
-        }
-
+        function deleteAllData() { if(confirm("എല്ലാ വിവരങ്ങളും ഡിലീറ്റ് ചെയ്യപ്പെടും. തുടരണോ?")) { db.customers = []; db.trans = []; db.promises = []; activeCid = null; saveDB(); closeModal(); } }
         function openEditTrans(tid) {
             const t = db.trans.find(x => x.id === tid);
             openModal(`
                 <h2 class="text-lg font-black mb-4 text-center text-white">EDIT ENTRY</h2>
-                <input id="eta" type="number" step="0.01" class="w-full p-4 mb-3 rounded-xl text-2xl text-center text-blue-600 bg-white font-bold" value="${t.amt}">
+                <input id="eta" type="number" step="0.01" class="w-full p-4 mb-3 rounded-xl text-xl text-center text-blue-600 bg-white font-bold" value="${t.amt}">
                 <input id="etr" type="text" class="w-full p-3 rounded-lg mb-3 text-black font-bold bg-white text-sm" value="${t.rem || ''}">
                 <input id="etd" type="date" class="w-full p-3 rounded-lg mb-4 text-black bg-white text-sm" value="${t.date}">
                 <button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white mb-2" onclick="updateTrans(${tid})">UPDATE</button>
@@ -353,16 +363,14 @@
                     <div id="qr" class="mb-3"></div>
                     <p class="text-black font-black text-2xl">₹${amt}</p>
                     <div class="w-full mt-4 space-y-2">
-                        <button onclick="shareWA('${cust ? cust.phone : ''}', ${amt})" class="w-full p-3 rounded-lg bg-green-600 text-white font-bold text-xs flex items-center justify-center gap-2"><i class="fa-brands fa-whatsapp"></i> WhatsApp Share</button>
-                        <button onclick="shareLink(${amt})" class="w-full p-3 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-2"><i class="fa-solid fa-share-nodes"></i> Link Share</button>
+                        <button onclick="shareWA('${cust ? cust.phone : ''}', ${amt})" class="w-full p-3 rounded-lg bg-green-600 text-white font-bold text-xs">WhatsApp Share</button>
                         <button onclick="closeModal()" class="w-full p-3 rounded-lg bg-red-500 text-white font-bold text-xs">Close</button>
                     </div>
                 </div>
             `);
-            new QRCode(document.getElementById("qr"), { text: `upi://pay?pa=${db.upi}&am=${amt}&cu=INR`, width: 180, height: 180 });
+            new QRCode(document.getElementById("qr"), { text: `upi://pay?pa=${db.upi}&am=${amt}&cu=INR`, width: 160, height: 160 });
         }
 
-        function shareLink(amt) { const link = `upi://pay?pa=${db.upi}&am=${amt}&cu=INR`; if (navigator.share) navigator.share({ title: 'Payment Link', text: `Pay ₹${amt}:`, url: link }); else alert("Link Copied: " + link); }
         function shareWA(p, b) { if(!p) return alert("Phone Number Missing"); const msg = `നിങ്ങളുടെ ബാക്കി തുക: ₹${Math.abs(b)}. ദയവായി പരിശോധിക്കുക.`; window.open(`https://wa.me/91${p}?text=${encodeURIComponent(msg)}`); }
         function exportData() { const blob=new Blob([JSON.stringify(db)], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`Khata_Backup.json`; a.click(); }
         function importData(e) { const reader=new FileReader(); reader.onload=(ev)=>{ try { db=JSON.parse(ev.target.result); saveDB(); location.reload(); } catch(e){alert("Error");} }; reader.readAsText(e.target.files[0]); }
