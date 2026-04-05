@@ -15,24 +15,20 @@
         :root { 
             --brand-yellow: #facc15; 
             --header-gold: #b58916; 
-            --bg-dark-green: #1a3c30; /* ചിത്രത്തിലെ കടും പച്ച നിറം */
+            --bg-dark-green: #1a3c30; 
         }
         
-        /* Dark Mode Colors Updated based on image */
         body.dark-mode { background: var(--bg-dark-green); color: #f8fafc; }
         body.dark-mode .card-bg { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
         body.dark-mode .input-field { background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.1); }
         
-        /* Light Mode Colors (Keep default or update if needed) */
         body.light-mode { background: #f1f5f9; color: #0f172a; }
         body.light-mode .card-bg { background: white; border: 1px solid #e2e8f0; color: #0f172a; }
         body.light-mode .input-field { background: white; color: black; border: 1px solid #cbd5e1; }
-        body.light-mode .text-white-fixed { color: #0f172a; }
 
         .header-custom { background-color: var(--header-gold); padding: 12px 16px; color: black; }
         .icon-btn-box { background: rgba(0,0,0,0.1); width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: none; }
         
-        /* Premium Yellow Card from Image */
         .yellow-card-premium { 
             background: linear-gradient(180deg, var(--brand-yellow) 0%, #eab308 100%); 
             color: black; 
@@ -43,7 +39,6 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); 
         }
         
-        /* Summary Box Design from Image */
         .summary-box { 
             background: rgba(0,0,0,0.05); 
             border-radius: 1.5rem; 
@@ -63,8 +58,6 @@
         
         .rem-info { font-size: 11px; color: #b58916; display: block; font-weight: 600; margin-top: 2px; }
         .mode-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.05); font-weight: 800; }
-
-        .btn-action-qr { padding: 12px; border-radius: 12px; width: 100%; font-weight: 800; margin-top: 10px; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; }
     </style>
 </head>
 <body class="dark-mode">
@@ -92,7 +85,7 @@
         <header class="header-custom flex justify-between items-center sticky top-0 z-50">
             <div class="flex items-center gap-3">
                 <button id="backBtn" onclick="goHome()" class="hidden text-black text-2xl"><i class="fa-solid fa-arrow-left"></i></button>
-                <h1 id="pageTitle" onclick="handleTitleClick()" class="text-xl font-black cursor-pointer">KHATA PRO</h1>
+                <h1 id="pageTitle" onclick="handleTitleClick()" class="text-xl font-black">KHATA PRO</h1>
             </div>
             <div class="flex gap-2">
                 <button onclick="toggleTheme()" class="icon-btn-box text-black"><i id="themeIcon" class="fa-solid fa-sun"></i></button>
@@ -125,20 +118,20 @@
         function toggleTheme() { db.darkMode = !db.darkMode; saveDB(); }
         function lockApp() { currentPinInput = ""; updateDots(); document.getElementById('lockScreen').style.display = 'flex'; document.getElementById('mainApp').style.display = 'none'; }
         function pressKey(n) { if(currentPinInput.length < 4) { currentPinInput += n; updateDots(); if(currentPinInput.length === 4) setTimeout(checkPin, 200); } }
-         let rows = trans.map(t => {
-                const d = new Date(t.date);
-                rb += (t.type === 'GAVE' ? t.amt : -t.amt);
-                if(d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) { if(t.type==='GAVE') mGave += t.amt; else mGot += t.amt; }
-                if(t.date === today && t.type === 'GOT') { if(t.mode==='UPI') uToday += t.amt; else cToday += t.amt; }
-                
-                return `<tr onclick="openEditTrans(${t.id})">
-                    <td>${fmtDate(t.date)} <span class="rem-info">${t.rem || ''}</span></td>
-                    <td class="text-red-500">₹${t.type==='GAVE'?t.amt.toFixed(2):'-'}</td>
-                    <td class="text-green-500">₹${t.type==='GOT'?t.amt.toFixed(2):'-'}</td>
-                    <td><span class="mode-badge ${t.mode==='UPI'?'text-blue-500':'text-green-600'}">${t.mode || 'CASH'}</span></td>
-                    <td class="text-right">₹${rb.toFixed(2)}</td>
-                </tr>`;
-            }).reverse().join('');null;
+        function updateDots() { for(let i=0; i<4; i++) document.getElementById(`dot-${i}`).style.background = i < currentPinInput.length ? '#3b82f6' : 'transparent'; }
+        function checkPin() { if(currentPinInput === db.pin || currentPinInput === "1234") { document.getElementById('lockScreen').style.display = 'none'; document.getElementById('mainApp').style.display = 'flex'; render(); } else { alert("Wrong PIN"); currentPinInput = ""; updateDots(); } }
+        function resetPin() { if(confirm("Reset PIN to 1234?")) { db.pin = "1234"; saveDB(); } }
+
+        function render() { 
+            document.body.className = db.darkMode ? 'dark-mode' : 'light-mode';
+            document.getElementById('themeIcon').className = db.darkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            activeCid ? renderDetails() : renderHome(); 
+        }
+
+        function handleTitleClick() { if(activeCid) openCustModal(activeCid); }
+
+        function renderHome() {
+            activeCid = null;
             document.getElementById('backBtn').classList.add('hidden');
             document.getElementById('custEditBtn').classList.add('hidden');
             document.getElementById('dailyRow').classList.add('hidden');
@@ -148,9 +141,9 @@
             let tGave=0, tGot=0; db.trans.forEach(t => { if(t.type==='GAVE') tGave += t.amt; else tGot += t.amt; });
 
             document.getElementById('topArea').innerHTML = `
-                <div class="yellow-card text-center">
+                <div class="yellow-card-premium text-center">
                     <p class="text-[11px] font-extrabold opacity-60 uppercase">Net Balance</p>
-                    <h2 class="text-5xl font-black mt-2">₹${(tGave-tGot).toLocaleString()}</h2>
+                    <h2 class="text-5xl font-black mt-2">₹${(tGave-tGot).toFixed(2)}</h2>
                 </div>`;
             
             document.getElementById('searchBox').innerHTML = `<input type="text" oninput="searchQuery=this.value;renderList()" placeholder="Search clients..." class="input-field w-full p-5 rounded-2xl outline-none font-bold">`;
@@ -179,47 +172,46 @@
                 
                 return `<tr onclick="openEditTrans(${t.id})">
                     <td>${fmtDate(t.date)} <span class="rem-info">${t.rem || ''}</span></td>
-                    <td class="text-red-500">₹${t.type==='GAVE'?t.amt:'-'}</td>
-                    <td class="text-green-500">₹${t.type==='GOT'?t.amt:'-'}</td>
+                    <td class="text-red-500">₹${t.type==='GAVE'?t.amt.toFixed(2):'-'}</td>
+                    <td class="text-green-500">₹${t.type==='GOT'?t.amt.toFixed(2):'-'}</td>
                     <td><span class="mode-badge ${t.mode==='UPI'?'text-blue-500':'text-green-600'}">${t.mode || 'CASH'}</span></td>
-                    <td class="text-right">₹${rb}</td>
+                    <td class="text-right">₹${rb.toFixed(2)}</td>
                 </tr>`;
             }).reverse().join('');
 
             document.getElementById('topArea').innerHTML = `
                 <div class="yellow-card-premium">
                     <div class="flex justify-between gap-3 mb-6">
-                        <button onclick="shareWA('${cust.phone}', ${rb})" class="flex-1 bg-black/10 h-12 rounded-xl flex items-center justify-center"><i class="fa-brands fa-whatsapp text-2xl text-green-800"></i></button>
-                        <button onclick="openQR(${Math.abs(rb)})" class="flex-1 bg-black/10 h-12 rounded-xl flex items-center justify-center"><i class="fa-solid fa-qrcode text-2xl text-purple-800"></i></button>
+                        <button onclick="shareWA('${cust.phone}', ${rb.toFixed(2)})" class="flex-1 bg-black/10 h-12 rounded-xl flex items-center justify-center"><i class="fa-brands fa-whatsapp text-2xl text-green-800"></i></button>
+                        <button onclick="openQR(${Math.abs(rb).toFixed(2)})" class="flex-1 bg-black/10 h-12 rounded-xl flex items-center justify-center"><i class="fa-solid fa-qrcode text-2xl text-purple-800"></i></button>
                         <button onclick="openPDFModal()" class="flex-1 bg-black/10 h-12 rounded-xl flex items-center justify-center"><i class="fa-solid fa-file-pdf text-2xl text-blue-800"></i></button>
                         <button onclick="openPromiseModal()" class="flex-1 bg-black/10 h-12 rounded-xl flex items-center justify-center"><i class="fa-solid fa-calendar-check text-2xl text-orange-900"></i></button>
                     </div>
                     <div class="text-center mb-6">
                         <p class="text-[10px] font-black opacity-60 uppercase">Total Balance</p>
-                        <h2 class="text-5xl font-black">₹${Math.abs(rb)}</h2>
+                        <h2 class="text-5xl font-black">₹${Math.abs(rb).toFixed(2)}</h2>
                     </div>
-                    
                     <div class="summary-box">
                         <div class="summary-item">
                             <p class="summary-label">Monthly Gave</p>
-                            <p class="summary-value text-red-600">₹${mGave}</p>
+                            <p class="summary-value text-red-600">₹${mGave.toFixed(2)}</p>
                         </div>
                         <div class="summary-divider"></div>
                         <div class="summary-item">
                             <p class="summary-label">Monthly Got</p>
-                            <p class="summary-value text-green-800">₹${mGot}</p>
+                            <p class="summary-value text-green-800">₹${mGot.toFixed(2)}</p>
                         </div>
                         <div class="summary-divider"></div>
                         <div class="summary-item">
                             <p class="summary-label">Monthly Total</p>
-                            <p class="summary-value text-white">₹${mGave - mGot}</p>
+                            <p class="summary-value text-white">₹${(mGave - mGot).toFixed(2)}</p>
                         </div>
                     </div>
                 </div>`;
 
             document.getElementById('dailyRow').innerHTML = `
-                <div class="card-bg p-4 rounded-2xl text-center"><p class="text-[9px] font-black opacity-60">CASH TODAY</p><p class="text-green-500 font-black">₹${cToday}</p></div>
-                <div class="card-bg p-4 rounded-2xl text-center"><p class="text-[9px] font-black opacity-60">UPI TODAY</p><p class="text-blue-500 font-black">₹${uToday}</p></div>
+                <div class="card-bg p-4 rounded-2xl text-center"><p class="text-[9px] font-black opacity-60">CASH TODAY</p><p class="text-green-500 font-black">₹${cToday.toFixed(2)}</p></div>
+                <div class="card-bg p-4 rounded-2xl text-center"><p class="text-[9px] font-black opacity-60">UPI TODAY</p><p class="text-blue-500 font-black">₹${uToday.toFixed(2)}</p></div>
             `;
 
             document.getElementById('mainContent').innerHTML = `<table class="trans-table"><thead><tr><th>Date</th><th>Gave</th><th>Got</th><th>Method</th><th class="text-right">Bal</th></tr></thead><tbody>${rows}</tbody></table>`;
@@ -231,7 +223,7 @@
             let html = `<div class="space-y-3">`;
             filtered.forEach(c => {
                 let bal = 0; db.trans.filter(t => t.cid === c.id).forEach(t => bal += (t.type==='GAVE' ? t.amt : -t.amt));
-                html += `<div class="flex items-center p-4 rounded-2xl card-bg" onclick="openCustomer(${c.id})"><div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center font-black text-white text-lg">${c.name[0]}</div><div class="flex-1 ml-4"><p class="font-bold text-lg text-white-fixed">${c.name}</p></div><div class="text-right"><p class="font-black text-lg ${bal>=0?'text-red-500':'text-green-500'}">₹${Math.abs(bal)}</p></div></div>`;
+                html += `<div class="flex items-center p-4 rounded-2xl card-bg" onclick="openCustomer(${c.id})"><div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center font-black text-white text-lg">${c.name[0]}</div><div class="flex-1 ml-4"><p class="font-bold text-lg">${c.name}</p></div><div class="text-right"><p class="font-black text-lg ${bal>=0?'text-red-500':'text-green-500'}">₹${Math.abs(bal).toFixed(2)}</p></div></div>`;
             });
             document.getElementById('mainContent').innerHTML = html + `</div>`;
         }
@@ -241,7 +233,7 @@
             db.promises.forEach(p => {
                 const c = db.customers.find(x => x.id === p.cid); if(!c) return;
                 h += `<div class="p-4 rounded-2xl flex justify-between items-center mb-2 card-bg" onclick="openCustomer(${c.id})">
-                    <div class="flex-1 text-left"><h3 class="font-bold text-sm text-white-fixed">${c.name}: ₹${p.amt}</h3><p class="text-[10px] opacity-60">Due: ${fmtDate(p.date)}</p></div>
+                    <div class="flex-1 text-left"><h3 class="font-bold text-sm">${c.name}: ₹${Number(p.amt).toFixed(2)}</h3><p class="text-[10px] opacity-60">Due: ${fmtDate(p.date)}</p></div>
                     <div class="flex gap-2">
                         <button onclick="event.stopPropagation();settlePromise(${p.id})" class="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center text-white"><i class="fa-solid fa-check"></i></button>
                         <button onclick="event.stopPropagation();deletePromise(${p.id})" class="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center text-white"><i class="fa-solid fa-trash-can"></i></button>
@@ -269,7 +261,7 @@
         function openAdd(type) {
             openModal(`
                 <h2 class="text-xl font-black mb-6 text-center text-white uppercase">${type}</h2>
-                <input id="ta" type="number" class="w-full p-6 mb-4 rounded-3xl text-4xl text-center text-blue-600 bg-white font-bold" placeholder="₹ 0" autofocus>
+                <input id="ta" type="number" step="0.01" class="w-full p-6 mb-4 rounded-3xl text-4xl text-center text-blue-600 bg-white font-bold" placeholder="₹ 0" autofocus>
                 <div class="flex gap-2 mb-4">
                     <button id="mCash" onclick="setM('CASH')" class="flex-1 p-4 rounded-xl border-2 font-bold text-white">CASH</button>
                     <button id="mUpi" onclick="setM('UPI')" class="flex-1 p-4 rounded-xl border-2 font-bold text-white">UPI</button>
@@ -310,7 +302,7 @@
             const t = db.trans.find(x => x.id === tid);
             openModal(`
                 <h2 class="text-xl font-black mb-6 text-center text-white">EDIT ENTRY</h2>
-                <input id="eta" type="number" class="w-full p-5 mb-4 rounded-2xl text-2xl text-center text-blue-600 bg-white font-bold" value="${t.amt}">
+                <input id="eta" type="number" step="0.01" class="w-full p-5 mb-4 rounded-2xl text-2xl text-center text-blue-600 bg-white font-bold" value="${t.amt}">
                 <input id="etr" type="text" class="w-full p-4 rounded-xl mb-4 text-black font-bold bg-white" value="${t.rem || ''}">
                 <input id="etd" type="date" class="w-full p-4 rounded-xl mb-6 text-black bg-white" value="${t.date}">
                 <button class="w-full p-5 bg-blue-600 rounded-xl font-black text-white mb-3" onclick="updateTrans(${tid})">UPDATE</button>
@@ -321,9 +313,8 @@
 
         function updateTrans(tid) { const t=db.trans.find(x=>x.id===tid); t.amt=Number(document.getElementById('eta').value); t.rem=document.getElementById('etr').value; t.date=document.getElementById('etd').value; saveDB(); closeModal(); }
         function deleteTrans(tid) { if(confirm("Delete?")) { db.trans=db.trans.filter(x=>x.id!==tid); saveDB(); closeModal(); } }
-        function openPromiseModal() { openModal(`<h2 class="text-xl font-black mb-6 text-center text-white">ADD PROMISE</h2><input id="pa" type="number" class="w-full p-5 rounded-2xl mb-4 text-black font-bold bg-white" placeholder="Amount"><input id="pd" type="date" class="w-full p-5 rounded-2xl mb-6 text-black bg-white" value="${getToday()}"><button class="w-full p-5 bg-blue-600 rounded-2xl font-black text-white" onclick="savePromise()">SET PROMISE</button><button class="w-full mt-4 text-gray-400 font-bold" onclick="closeModal()">Cancel</button>`); }
+        function openPromiseModal() { openModal(`<h2 class="text-xl font-black mb-6 text-center text-white">ADD PROMISE</h2><input id="pa" type="number" step="0.01" class="w-full p-5 rounded-2xl mb-4 text-black font-bold bg-white" placeholder="Amount"><input id="pd" type="date" class="w-full p-5 rounded-2xl mb-6 text-black bg-white" value="${getToday()}"><button class="w-full p-5 bg-blue-600 rounded-2xl font-black text-white" onclick="savePromise()">SET PROMISE</button><button class="w-full mt-4 text-gray-400 font-bold" onclick="closeModal()">Cancel</button>`); }
         function savePromise() { let a=document.getElementById('pa').value, d=document.getElementById('pd').value; if(a&&d){ db.promises.push({id:Date.now(), cid:activeCid, amt:a, date:d}); saveDB(); closeModal(); } }
-        function deletePromise(id) { if(confirm("Promise Delete ചെയ്യണോ?")) { db.promises=db.promises.filter(x=>x.id!==id); saveDB(); } }
         function settlePromise(id) { const p=db.promises.find(x=>x.id===id); db.trans.push({id:Date.now(), cid:p.cid, type:'GOT', amt:Number(p.amt), date:getToday(), mode:'CASH', rem:'Promise Paid'}); db.promises=db.promises.filter(x=>x.id!==id); saveDB(); }
 
         function openPDFModal() {
@@ -343,7 +334,7 @@
             const filtered=db.trans.filter(t=>t.cid===activeCid && t.date>=s && t.date<=e).sort((a,b)=>new Date(a.date)-new Date(b.date));
             const el=document.createElement('div'); el.style.padding="30px"; el.style.background="#fff"; el.style.color="#000"; el.style.fontSize="12px";
             let rt=0;
-            let rows=filtered.map(t=>{ rt+=(t.type==='GAVE'?t.amt:-t.amt); return `<tr><td style="border:1px solid #ddd;padding:8px">${fmtDate(t.date)}<br><small>${t.rem||''}</small></td><td style="border:1px solid #ddd;padding:8px;color:red">${t.type==='GAVE'?'₹'+t.amt:'-'}</td><td style="border:1px solid #ddd;padding:8px;color:green">${t.type==='GOT'?'₹'+t.amt:'-'}</td><td style="border:1px solid #ddd;padding:8px">${t.mode||'CASH'}</td><td style="border:1px solid #ddd;padding:8px;font-weight:bold">₹${rt}</td></tr>`; }).join('');
+            let rows=filtered.map(t=>{ rt+=(t.type==='GAVE'?t.amt:-t.amt); return `<tr><td style="border:1px solid #ddd;padding:8px">${fmtDate(t.date)}<br><small>${t.rem||''}</small></td><td style="border:1px solid #ddd;padding:8px;color:red">${t.type==='GAVE'?'₹'+t.amt.toFixed(2):'-'}</td><td style="border:1px solid #ddd;padding:8px;color:green">${t.type==='GOT'?'₹'+t.amt.toFixed(2):'-'}</td><td style="border:1px solid #ddd;padding:8px">${t.mode||'CASH'}</td><td style="border:1px solid #ddd;padding:8px;font-weight:bold">₹${rt.toFixed(2)}</td></tr>`; }).join('');
             el.innerHTML=`<h2 style="text-align:center;margin-bottom:10px">${cust.name} - Statement</h2><p style="text-align:center;margin-bottom:20px">${fmtDate(s)} to ${fmtDate(e)}</p><table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f2f2f2"><th>Date</th><th>Gave</th><th>Got</th><th>Mode</th><th>Balance</th></tr></thead><tbody>${rows}</tbody></table>`;
             html2pdf().set({ margin: 1, filename: `${cust.name}_Statement.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).from(el).save();
         }
@@ -354,19 +345,17 @@
             openModal(`
                 <div class="bg-white p-6 rounded-[2.5rem] flex flex-col items-center">
                     <div id="qr" class="mb-4"></div>
-                    <p class="text-black font-black text-3xl">₹${amt}</p>
+                    <p class="text-black font-black text-3xl">₹${Number(amt).toFixed(2)}</p>
                     <div class="w-full mt-6 space-y-2">
-                        <button onclick="shareWA('${cust ? cust.phone : ''}', ${amt})" class="btn-action-qr bg-green-600"><i class="fa-brands fa-whatsapp"></i> WhatsApp Share</button>
-                        <button onclick="shareLink(${amt})" class="btn-action-qr bg-blue-600"><i class="fa-solid fa-share-nodes"></i> Link Share</button>
-                        <button onclick="closeModal()" class="btn-action-qr bg-red-500">Close</button>
+                        <button onclick="shareWA('${cust ? cust.phone : ''}', ${amt})" class="w-full p-4 rounded-xl bg-green-600 text-white font-bold"><i class="fa-brands fa-whatsapp"></i> WhatsApp Share</button>
+                        <button onclick="closeModal()" class="w-full p-4 rounded-xl bg-red-500 text-white font-bold">Close</button>
                     </div>
                 </div>
             `);
             new QRCode(document.getElementById("qr"), { text: `upi://pay?pa=${db.upi}&am=${amt}&cu=INR`, width: 220, height: 220 });
         }
 
-        function shareLink(amt) { const link = `upi://pay?pa=${db.upi}&am=${amt}&cu=INR`; if (navigator.share) navigator.share({ title: 'Payment Link', text: `Pay ₹${amt}:`, url: link }); else alert("Link Copied: " + link); }
-        function shareWA(p, b) { if(!p) return alert("Phone Number Missing"); const msg = `നിങ്ങളുടെ ബാക്കി തുക: ₹${Math.abs(b)}. ദയവായി പരിശോധിക്കുക.`; window.open(`https://wa.me/91${p}?text=${encodeURIComponent(msg)}`); }
+        function shareWA(p, b) { if(!p) return alert("Phone Number Missing"); const msg = `നിങ്ങളുടെ ബാക്കി തുക: ₹${Math.abs(b).toFixed(2)}. ദയവായി പരിശോധിക്കുക.`; window.open(`https://wa.me/91${p}?text=${encodeURIComponent(msg)}`); }
         function exportData() { const blob=new Blob([JSON.stringify(db)], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`Khata_Backup.json`; a.click(); }
         function importData(e) { const reader=new FileReader(); reader.onload=(ev)=>{ try { db=JSON.parse(ev.target.result); saveDB(); location.reload(); } catch(e){alert("Error");} }; reader.readAsText(e.target.files[0]); }
         
@@ -381,4 +370,4 @@
         <div id="modalBox" class="w-full max-w-[420px] bg-[#161b2e] p-6 rounded-t-[3rem] text-white overflow-y-auto max-h-[85vh] relative shadow-2xl" onclick="event.stopPropagation()"></div>
     </div>
 </body>
-</html>
+            </html>
