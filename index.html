@@ -33,15 +33,16 @@
         
         .summary-box { background: rgba(0,0,0,0.05); border-radius: 1.2rem; padding: 10px; display: flex; justify-content: space-between; margin-top: 15px; }
         .summary-item { text-align: center; flex: 1; }
-        .summary-label { font-size: 8px; font-weight: 800; opacity: 0.6; text-transform: uppercase; }
-        .summary-value { font-size: 13px; font-weight: 900; }
+        .summary-label { font-size: 9px; font-weight: 800; opacity: 0.7; text-transform: uppercase; }
+        .summary-value { font-size: 14px; font-weight: 900; }
 
+        /* TABLE TEXT ENLARGED */
         .trans-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .trans-table th { font-size: 8px; opacity: 0.6; padding: 8px 2px; text-align: left; text-transform: uppercase; border-bottom: 1px solid rgba(0,0,0,0.1); }
-        .trans-table td { padding: 10px 2px; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; }
+        .trans-table th { font-size: 10px; opacity: 0.7; padding: 12px 2px; text-align: left; text-transform: uppercase; border-bottom: 2px solid rgba(0,0,0,0.1); }
+        .trans-table td { padding: 14px 2px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; }
         
-        .rem-info { font-size: 9px; color: #b58916; font-weight: 600; display: block; overflow: hidden; text-overflow: ellipsis; }
-        .mode-badge { font-size: 8px; padding: 1px 3px; border-radius: 3px; background: rgba(0,0,0,0.05); font-weight: 800; }
+        .rem-info { font-size: 10px; color: #b58916; font-weight: 600; display: block; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+        .mode-badge { font-size: 9px; padding: 2px 4px; border-radius: 4px; background: rgba(0,0,0,0.1); font-weight: 800; }
     </style>
 </head>
 <body class="dark-mode">
@@ -120,8 +121,8 @@
             document.getElementById('pageTitle').innerText = "KHATA PRO";
             renderPromises();
             let tGave=0, tGot=0; db.trans.forEach(t => { if(t.type==='GAVE') tGave += t.amt; else tGot += t.amt; });
-            document.getElementById('topArea').innerHTML = `<div class="yellow-card-premium text-center"><p class="text-[10px] font-extrabold opacity-60 uppercase">Net Balance</p><h2 class="text-4xl font-black mt-2">₹${(tGave-tGot).toFixed(2)}</h2></div>`;
-            document.getElementById('searchBox').innerHTML = `<input type="text" oninput="searchQuery=this.value;renderList()" placeholder="Search clients..." class="input-field w-full p-4 rounded-xl outline-none font-bold">`;
+            document.getElementById('topArea').innerHTML = `<div class="yellow-card-premium text-center"><p class="text-[11px] font-extrabold opacity-70 uppercase">Net Balance</p><h2 class="text-4xl font-black mt-2">₹${(tGave-tGot).toFixed(2)}</h2></div>`;
+            document.getElementById('searchBox').innerHTML = `<input type="text" oninput="searchQuery=this.value;renderList()" placeholder="Search clients..." class="input-field w-full p-4 rounded-xl outline-none font-bold text-lg">`;
             renderList();
             document.getElementById('footerActions').innerHTML = `<button class="w-full p-5 bg-blue-600 rounded-2xl font-black text-xl text-white shadow-xl" onclick="openCustModal()"><i class="fa-solid fa-user-plus mr-2"></i> NEW CLIENT</button>`;
         }
@@ -145,7 +146,7 @@
                 if(t.date === today && t.type === 'GOT') { if(t.mode==='UPI') uToday += t.amt; else cToday += t.amt; }
                 
                 return `<tr onclick="openEditTrans(${t.id})">
-                    <td style="width:20%">${fmtDate(t.date)} <span class="rem-info">${t.rem || ''}</span></td>
+                    <td style="width:20%">${fmtDate(t.date)}<span class="rem-info">${t.rem || ''}</span></td>
                     <td class="text-red-500" style="width:22%">₹${t.type==='GAVE'?t.amt.toFixed(2):'-'}</td>
                     <td class="text-green-500" style="width:22%">₹${t.type==='GOT'?t.amt.toFixed(2):'-'}</td>
                     <td style="width:14%"><span class="mode-badge ${t.mode==='UPI'?'text-blue-500':'text-green-600'}">${t.mode==='UPI'?'U':'C'}</span></td>
@@ -162,7 +163,7 @@
                         <button onclick="openPromiseModal()" class="flex-1 bg-black/10 h-10 rounded-lg flex items-center justify-center"><i class="fa-solid fa-calendar-check text-xl text-orange-900"></i></button>
                     </div>
                     <div class="text-center mb-6">
-                        <p class="text-[10px] font-black opacity-60 uppercase">Balance</p>
+                        <p class="text-[11px] font-black opacity-70 uppercase">Balance</p>
                         <h2 class="text-4xl font-black">₹${Math.abs(rb).toFixed(2)}</h2>
                     </div>
                     <div class="summary-box">
@@ -173,8 +174,8 @@
                 </div>`;
 
             document.getElementById('dailyRow').innerHTML = `
-                <div class="card-bg p-3 rounded-xl text-center"><p class="text-[8px] font-black opacity-60">CASH TODAY</p><p class="text-green-500 font-black text-sm">₹${cToday.toFixed(2)}</p></div>
-                <div class="card-bg p-3 rounded-xl text-center"><p class="text-[8px] font-black opacity-60">UPI TODAY</p><p class="text-blue-500 font-black text-sm">₹${uToday.toFixed(2)}</p></div>
+                <div class="card-bg p-3 rounded-xl text-center"><p class="text-[9px] font-black opacity-70">CASH TODAY</p><p class="text-green-500 font-black text-lg">₹${cToday.toFixed(2)}</p></div>
+                <div class="card-bg p-3 rounded-xl text-center"><p class="text-[9px] font-black opacity-70">UPI TODAY</p><p class="text-blue-500 font-black text-lg">₹${uToday.toFixed(2)}</p></div>
             `;
 
             document.getElementById('mainContent').innerHTML = `
@@ -190,7 +191,7 @@
             let html = `<div class="space-y-3">`;
             filtered.forEach(c => {
                 let bal = 0; db.trans.filter(t => t.cid === c.id).forEach(t => bal += (t.type==='GAVE' ? t.amt : -t.amt));
-                html += `<div class="flex items-center p-4 rounded-xl card-bg" onclick="openCustomer(${c.id})"><div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-black text-white">${c.name[0]}</div><div class="flex-1 ml-3"><p class="font-bold text-sm">${c.name}</p></div><div class="text-right"><p class="font-black text-sm ${bal>=0?'text-red-500':'text-green-500'}">₹${Math.abs(bal).toFixed(2)}</p></div></div>`;
+                html += `<div class="flex items-center p-4 rounded-xl card-bg" onclick="openCustomer(${c.id})"><div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center font-black text-white text-xl">${c.name[0]}</div><div class="flex-1 ml-3"><p class="font-bold text-lg">${c.name}</p></div><div class="text-right"><p class="font-black text-lg ${bal>=0?'text-red-500':'text-green-500'}">₹${Math.abs(bal).toFixed(2)}</p></div></div>`;
             });
             document.getElementById('mainContent').innerHTML = html + `</div>`;
         }
@@ -199,11 +200,11 @@
             let h = "";
             db.promises.forEach(p => {
                 const c = db.customers.find(x => x.id === p.cid); if(!c) return;
-                h += `<div class="p-3 rounded-xl flex justify-between items-center mb-2 card-bg" onclick="openCustomer(${c.id})">
-                    <div class="flex-1 text-left"><h3 class="font-bold text-xs">${c.name}: ₹${Number(p.amt).toFixed(2)}</h3><p class="text-[9px] opacity-60">Due: ${fmtDate(p.date)}</p></div>
+                h += `<div class="p-4 rounded-xl flex justify-between items-center mb-2 card-bg" onclick="openCustomer(${c.id})">
+                    <div class="flex-1 text-left"><h3 class="font-bold text-sm">${c.name}: ₹${Number(p.amt).toFixed(2)}</h3><p class="text-[10px] opacity-70">Due: ${fmtDate(p.date)}</p></div>
                     <div class="flex gap-2">
-                        <button onclick="event.stopPropagation();settlePromise(${p.id})" class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center text-white text-xs"><i class="fa-solid fa-check"></i></button>
-                        <button onclick="event.stopPropagation();deletePromise(${p.id})" class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white text-xs"><i class="fa-solid fa-trash-can"></i></button>
+                        <button onclick="event.stopPropagation();settlePromise(${p.id})" class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center text-white text-sm"><i class="fa-solid fa-check"></i></button>
+                        <button onclick="event.stopPropagation();deletePromise(${p.id})" class="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center text-white text-sm"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                 </div>`;
             });
@@ -214,9 +215,9 @@
             const c = cid ? db.customers.find(x=>x.id===cid) : {name:'', phone:''};
             openModal(`
                 <h2 class="text-xl font-black mb-4 text-center text-white uppercase">${cid?'Edit':'New'} Client</h2>
-                <input id="cn" class="w-full p-4 rounded-xl mb-3 text-black font-bold" placeholder="Name" value="${c.name}">
-                <input id="cp" type="number" class="w-full p-4 rounded-xl mb-4 text-black font-bold" placeholder="Phone" value="${c.phone}">
-                <button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white" onclick="saveCust(${cid})">SAVE</button>
+                <input id="cn" class="w-full p-4 rounded-xl mb-3 text-black font-bold text-lg" placeholder="Name" value="${c.name}">
+                <input id="cp" type="number" class="w-full p-4 rounded-xl mb-4 text-black font-bold text-lg" placeholder="Phone" value="${c.phone}">
+                <button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white text-lg" onclick="saveCust(${cid})">SAVE</button>
                 <button class="w-full mt-4 text-gray-400 font-bold" onclick="closeModal()">Cancel</button>
                 ${cid ? `<button class="w-full p-3 bg-red-900 rounded-xl mt-6 font-black text-white text-[12px]" onclick="deleteFullCust(${cid})"><i class="fa-solid fa-trash-can mr-2"></i> DELETE CUSTOMER & HISTORY</button>` : ''}
             `);
@@ -230,38 +231,38 @@
                 <h2 class="text-lg font-black mb-4 text-center text-white uppercase">${type}</h2>
                 <input id="ta" type="number" step="0.01" class="w-full p-4 mb-4 rounded-xl text-3xl text-center text-blue-600 font-bold" placeholder="₹ 0" autofocus>
                 <div class="flex gap-2 mb-4">
-                    <button id="mCash" onclick="setM('CASH')" class="flex-1 p-3 rounded-lg border font-bold text-xs text-white">CASH</button>
-                    <button id="mUpi" onclick="setM('UPI')" class="flex-1 p-3 rounded-lg border font-bold text-xs text-white">UPI</button>
+                    <button id="mCash" onclick="setM('CASH')" class="flex-1 p-3 rounded-lg border font-bold text-sm text-white">CASH</button>
+                    <button id="mUpi" onclick="setM('UPI')" class="flex-1 p-3 rounded-lg border font-bold text-sm text-white">UPI</button>
                 </div>
-                <input id="tr" type="text" class="w-full p-4 rounded-xl mb-3 text-black font-bold" placeholder="Remarks">
-                <input id="td" type="date" class="w-full p-4 rounded-xl mb-4 text-black" value="${getToday()}">
+                <input id="tr" type="text" class="w-full p-4 rounded-xl mb-3 text-black font-bold text-lg" placeholder="Remarks">
+                <input id="td" type="date" class="w-full p-4 rounded-xl mb-4 text-black text-lg" value="${getToday()}">
                 <input type="hidden" id="tm" value="CASH">
-                <button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white shadow-xl" onclick="saveTrans('${type}')">SAVE</button>
-                <button class="w-full mt-4 text-gray-400 font-bold text-sm" onclick="closeModal()">Cancel</button>
+                <button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white shadow-xl text-lg" onclick="saveTrans('${type}')">SAVE</button>
+                <button class="w-full mt-4 text-gray-400 font-bold" onclick="closeModal()">Cancel</button>
             `);
             setM('CASH');
         }
 
         function setM(m) {
             document.getElementById('tm').value = m;
-            document.getElementById('mCash').className = m==='CASH' ? 'flex-1 p-3 rounded-lg border-yellow-500 bg-yellow-500 text-black font-bold text-xs' : 'flex-1 p-3 rounded-lg border-white/10 bg-white/5 font-bold text-xs';
-            document.getElementById('mUpi').className = m==='UPI' ? 'flex-1 p-3 rounded-lg border-blue-500 bg-blue-500 text-white font-bold text-xs' : 'flex-1 p-3 rounded-lg border-white/10 bg-white/5 font-bold text-xs';
+            document.getElementById('mCash').className = m==='CASH' ? 'flex-1 p-3 rounded-lg border-yellow-500 bg-yellow-500 text-black font-bold text-sm' : 'flex-1 p-3 rounded-lg border-white/10 bg-white/5 font-bold text-sm';
+            document.getElementById('mUpi').className = m==='UPI' ? 'flex-1 p-3 rounded-lg border-blue-500 bg-blue-500 text-white font-bold text-sm' : 'flex-1 p-3 rounded-lg border-white/10 bg-white/5 font-bold text-sm';
         }
 
         function saveTrans(type) { let a=Number(document.getElementById('ta').value), d=document.getElementById('td').value, r=document.getElementById('tr').value, m=document.getElementById('tm').value; if(a && d){ db.trans.push({id:Date.now(), cid:activeCid, type, amt:a, date:d, rem:r, mode:m}); saveDB(); closeModal(); } }
         
         function openSettings() {
             openModal(`
-                <h2 class="text-xl font-black mb-4 text-center text-white">SETTINGS</h2>
-                <input id="upiI" class="w-full p-4 rounded-xl text-black mb-3 font-bold" value="${db.upi||''}" placeholder="UPI ID">
-                <input id="pinI" class="w-full p-4 rounded-xl text-black mb-4 font-bold" value="${db.pin}" placeholder="PIN">
-                <button class="w-full p-4 bg-blue-600 rounded-xl font-bold mb-3 text-white" onclick="db.upi=document.getElementById('upiI').value;db.pin=document.getElementById('pinI').value;saveDB();closeModal();">APPLY CHANGES</button>
+                <h2 class="text-xl font-black mb-4 text-center text-white uppercase">Settings</h2>
+                <input id="upiI" class="w-full p-4 rounded-xl text-black mb-3 font-bold text-lg" value="${db.upi||''}" placeholder="UPI ID">
+                <input id="pinI" class="w-full p-4 rounded-xl text-black mb-4 font-bold text-lg" value="${db.pin}" placeholder="PIN">
+                <button class="w-full p-4 bg-blue-600 rounded-xl font-bold mb-3 text-white text-lg" onclick="db.upi=document.getElementById('upiI').value;db.pin=document.getElementById('pinI').value;saveDB();closeModal();">APPLY CHANGES</button>
                 <div class="grid grid-cols-2 gap-2 mb-6">
-                    <button class="p-3 bg-green-700 rounded-lg text-white font-bold text-[10px]" onclick="exportData()">BACKUP</button>
-                    <button class="p-3 bg-purple-700 rounded-lg text-white font-bold text-[10px]" onclick="document.getElementById('imp').click()">RESTORE</button>
+                    <button class="p-3 bg-green-700 rounded-lg text-white font-bold text-[11px]" onclick="exportData()">BACKUP</button>
+                    <button class="p-3 bg-purple-700 rounded-lg text-white font-bold text-[11px]" onclick="document.getElementById('imp').click()">RESTORE</button>
                 </div>
                 <button class="w-full p-3 bg-red-600 rounded-xl font-black text-white text-[12px] mb-4" onclick="resetAllData()"><i class="fa-solid fa-triangle-exclamation mr-2"></i> DELETE ALL DATA (RESET)</button>
-                <button class="w-full text-gray-400 font-bold text-sm" onclick="closeModal()">Close</button>
+                <button class="w-full text-gray-400 font-bold" onclick="closeModal()">Close</button>
                 <input type="file" id="imp" class="hidden" onchange="importData(event)">
             `);
         }
@@ -272,19 +273,19 @@
             const t = db.trans.find(x => x.id === tid);
             openModal(`
                 <h2 class="text-lg font-black mb-4 text-center text-white">EDIT ENTRY</h2>
-                <input id="eta" type="number" step="0.01" class="w-full p-4 mb-3 rounded-xl text-2xl text-center text-blue-600 font-bold" value="${t.amt}">
-                <input id="etr" type="text" class="w-full p-4 rounded-xl mb-3 text-black font-bold" value="${t.rem || ''}">
-                <input id="etd" type="date" class="w-full p-4 rounded-xl mb-4 text-black" value="${t.date}">
-                <button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white mb-2" onclick="updateTrans(${tid})">UPDATE</button>
-                <button class="w-full p-4 bg-red-600 rounded-xl font-black text-white mb-4" onclick="deleteTrans(${tid})">DELETE ENTRY</button>
-                <button class="w-full text-gray-400 font-bold text-sm" onclick="closeModal()">Cancel</button>
+                <input id="eta" type="number" step="0.01" class="w-full p-4 mb-3 rounded-xl text-3xl text-center text-blue-600 font-bold" value="${t.amt}">
+                <input id="etr" type="text" class="w-full p-4 rounded-xl mb-3 text-black font-bold text-lg" value="${t.rem || ''}">
+                <input id="etd" type="date" class="w-full p-4 rounded-xl mb-4 text-black text-lg" value="${t.date}">
+                <button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white mb-2 text-lg" onclick="updateTrans(${tid})">UPDATE</button>
+                <button class="w-full p-4 bg-red-600 rounded-xl font-black text-white mb-4 text-lg" onclick="deleteTrans(${tid})">DELETE ENTRY</button>
+                <button class="w-full text-gray-400 font-bold" onclick="closeModal()">Cancel</button>
             `);
         }
 
         function updateTrans(tid) { const t=db.trans.find(x=>x.id===tid); t.amt=Number(document.getElementById('eta').value); t.rem=document.getElementById('etr').value; t.date=document.getElementById('etd').value; saveDB(); closeModal(); }
         function deleteTrans(tid) { if(confirm("ഈ എൻട്രി ഡിലീറ്റ് ചെയ്യണോ?")) { db.trans=db.trans.filter(x=>x.id!==tid); saveDB(); closeModal(); } }
         
-        function openPromiseModal() { openModal(`<h2 class="text-lg font-black mb-4 text-center text-white">ADD PROMISE</h2><input id="pa" type="number" step="0.01" class="w-full p-4 rounded-xl mb-3 text-black font-bold" placeholder="Amount"><input id="pd" type="date" class="w-full p-4 rounded-xl mb-4 text-black" value="${getToday()}"><button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white" onclick="savePromise()">SET PROMISE</button><button class="w-full mt-4 text-gray-400 font-bold text-sm" onclick="closeModal()">Cancel</button>`); }
+        function openPromiseModal() { openModal(`<h2 class="text-lg font-black mb-4 text-center text-white">ADD PROMISE</h2><input id="pa" type="number" step="0.01" class="w-full p-4 rounded-xl mb-3 text-black font-bold text-lg" placeholder="Amount"><input id="pd" type="date" class="w-full p-4 rounded-xl mb-4 text-black text-lg" value="${getToday()}"><button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white text-lg" onclick="savePromise()">SET PROMISE</button><button class="w-full mt-4 text-gray-400 font-bold" onclick="closeModal()">Cancel</button>`); }
         function savePromise() { let a=document.getElementById('pa').value, d=document.getElementById('pd').value; if(a&&d){ db.promises.push({id:Date.now(), cid:activeCid, amt:a, date:d}); saveDB(); closeModal(); } }
         function settlePromise(id) { const p=db.promises.find(x=>x.id===id); db.trans.push({id:Date.now(), cid:p.cid, type:'GOT', amt:Number(p.amt), date:getToday(), mode:'CASH', rem:'Promise Paid'}); db.promises=db.promises.filter(x=>x.id!==id); saveDB(); }
         function deletePromise(id) { if(confirm("Delete Promise?")) { db.promises=db.promises.filter(x=>x.id!==id); saveDB(); } }
@@ -293,10 +294,10 @@
             openModal(`
                 <h2 class="mb-4 font-bold text-center text-white">GENERATE REPORT</h2>
                 <div class="space-y-4">
-                    <input id="ps" type="date" class="w-full p-4 rounded-xl text-black" value="2026-01-01">
-                    <input id="pe" type="date" class="w-full p-4 rounded-xl text-black" value="${getToday()}">
-                    <button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white" onclick="generatePDF()">DOWNLOAD PDF</button>
-                    <button class="w-full text-gray-400 font-bold text-sm" onclick="closeModal()">Close</button>
+                    <input id="ps" type="date" class="w-full p-4 rounded-xl text-black text-lg" value="2026-01-01">
+                    <input id="pe" type="date" class="w-full p-4 rounded-xl text-black text-lg" value="${getToday()}">
+                    <button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white text-lg" onclick="generatePDF()">DOWNLOAD PDF</button>
+                    <button class="w-full text-gray-400 font-bold" onclick="closeModal()">Close</button>
                 </div>
             `);
         }
@@ -304,9 +305,9 @@
         function generatePDF() {
             const s=document.getElementById('ps').value, e=document.getElementById('pe').value, cust=db.customers.find(c=>c.id===activeCid);
             const filtered=db.trans.filter(t=>t.cid===activeCid && t.date>=s && t.date<=e).sort((a,b)=>new Date(a.date)-new Date(b.date));
-            const el=document.createElement('div'); el.style.padding="20px"; el.style.background="#fff"; el.style.color="#000"; el.style.fontSize="10px";
+            const el=document.createElement('div'); el.style.padding="20px"; el.style.background="#fff"; el.style.color="#000"; el.style.fontSize="12px";
             let rt=0;
-            let rows=filtered.map(t=>{ rt+=(t.type==='GAVE'?t.amt:-t.amt); return `<tr><td style="border:1px solid #ddd;padding:5px">${fmtDate(t.date)}</td><td style="border:1px solid #ddd;padding:5px;color:red">${t.type==='GAVE'?t.amt.toFixed(2):'-'}</td><td style="border:1px solid #ddd;padding:5px;color:green">${t.type==='GOT'?t.amt.toFixed(2):'-'}</td><td style="border:1px solid #ddd;padding:5px">${t.mode||'CASH'}</td><td style="border:1px solid #ddd;padding:5px;font-weight:bold">₹${rt.toFixed(2)}</td></tr>`; }).join('');
+            let rows=filtered.map(t=>{ rt+=(t.type==='GAVE'?t.amt:-t.amt); return `<tr><td style="border:1px solid #ddd;padding:8px">${fmtDate(t.date)}</td><td style="border:1px solid #ddd;padding:8px;color:red">${t.type==='GAVE'?t.amt.toFixed(2):'-'}</td><td style="border:1px solid #ddd;padding:8px;color:green">${t.type==='GOT'?t.amt.toFixed(2):'-'}</td><td style="border:1px solid #ddd;padding:8px">${t.mode||'CASH'}</td><td style="border:1px solid #ddd;padding:8px;font-weight:bold">₹${rt.toFixed(2)}</td></tr>`; }).join('');
             el.innerHTML=`<h3 style="text-align:center">${cust.name}</h3><table style="width:100%;border-collapse:collapse;margin-top:10px"><thead><tr style="background:#f2f2f2"><th>Date</th><th>Gave</th><th>Got</th><th>Mode</th><th>Bal</th></tr></thead><tbody>${rows}</tbody></table>`;
             html2pdf().set({ margin: 0.5, filename: `${cust.name}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).from(el).save();
         }
