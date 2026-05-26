@@ -1,345 +1,984 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KHATA PRO | v550</title>
+    <title>ASMA'S KHATA - Premium Ledger</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
+        body { overflow: hidden; height: 100vh; width: 100vw; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         
-        :root { --brand-yellow: #facc15; --header-gold: #b58916; --bg-dark-green: #1a3c30; }
+        .pin-btn { transition: 0.05s linear; cursor: pointer; }
+        .pin-btn:active { transform: scale(0.92); background: #facc15 !important; color: black !important; }
+        .click-card:active { transform: scale(0.98); transition: 0.05s; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #f59e0b; border-radius: 10px; }
         
-        body.dark-mode { background: var(--bg-dark-green); color: #f8fafc; overflow-x: hidden; }
-        body.dark-mode .card-bg { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
-        body.dark-mode .input-field { background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.1); }
+        .ledger-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .ledger-table th { 
+            background: linear-gradient(135deg, #f59e0b, #f97316);
+            padding: 12px 8px; 
+            text-align: left; 
+            font-weight: 800; 
+            font-size: 12px;
+            text-transform: uppercase;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            color: white;
+        }
+        .ledger-table td { padding: 10px 8px; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
         
-        body.light-mode { background: #f1f5f9; color: #0f172a; overflow-x: hidden; }
-        body.light-mode .card-bg { background: white; border: 1px solid #e2e8f0; }
-
-        .header-custom { background-color: var(--header-gold); padding: 12px 16px; color: black; }
-        .icon-btn-box { background: rgba(0,0,0,0.1); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: none; }
+        .amount-gave { color: #dc2626; font-weight: 800; }
+        .amount-got { color: #10b981; font-weight: 800; }
+        .balance-positive { color: #dc2626; font-weight: 800; }
+        .balance-negative { color: #10b981; font-weight: 800; }
         
-        .yellow-card-premium { 
-            background: linear-gradient(180deg, var(--brand-yellow) 0%, #eab308 100%); 
-            color: black; margin: -16px -16px 20px -16px; padding: 20px 16px; 
-            border-bottom-left-radius: 2.5rem; border-bottom-right-radius: 2.5rem; 
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); 
+        .fixed-bottom-buttons {
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            border-radius: 25px 25px 0 0;
+            z-index: 50;
+            margin-top: 10px;
         }
         
-        .summary-box { background: rgba(0,0,0,0.05); border-radius: 1.2rem; padding: 10px; display: flex; justify-content: space-between; margin-top: 15px; }
-        .summary-item { text-align: center; flex: 1; }
-        .summary-label { font-size: 9px; font-weight: 800; opacity: 0.7; text-transform: uppercase; }
-        .summary-value { font-size: 14px; font-weight: 900; }
-
-        .trans-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .trans-table th { font-size: 10px; opacity: 0.7; padding: 12px 2px; text-align: left; text-transform: uppercase; border-bottom: 2px solid rgba(0,0,0,0.1); }
-        .trans-table td { padding: 14px 2px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; }
+        .scrollable-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            padding-bottom: 0;
+        }
         
-        .rem-info { font-size: 10px; color: #b58916; font-weight: 600; display: block; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
-        .mode-badge { font-size: 9px; padding: 2px 4px; border-radius: 4px; background: rgba(0,0,0,0.1); font-weight: 800; }
+        .action-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 16px;
+            font-weight: 900;
+            font-size: 18px;
+            text-align: center;
+            transition: transform 0.1s ease;
+        }
+        .action-btn:active { transform: scale(0.97); }
+        .gave-btn { background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; box-shadow: 0 4px 15px rgba(220,38,38,0.4); }
+        .got-btn { background: linear-gradient(135deg, #10b981, #059669); color: white; box-shadow: 0 4px 15px rgba(16,185,129,0.4); }
+        
+        .card-modern {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
     </style>
 </head>
-<body class="dark-mode">
+<body>
 
-    <div id="lockScreen" class="fixed inset-0 bg-[#0b0f1a] z-[9999] flex flex-col items-center justify-center p-8">
-        <div class="mb-8 text-center text-white">
-            <div class="w-20 h-20 bg-blue-600 rounded-3xl mx-auto mb-4 flex items-center justify-center shadow-2xl"><i class="fa-solid fa-lock text-4xl"></i></div>
-            <h2 class="text-2xl font-black uppercase tracking-widest">Khata Pro</h2>
+<!-- LOCK SCREEN -->
+<div id="lockScreen" style="position: fixed; inset: 0; background: linear-gradient(135deg, #1e1b4b, #0f172a, #2e1065); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
+    <div class="text-center mb-8">
+        <div class="w-28 h-28 bg-gradient-to-br from-amber-500 to-orange-500 rounded-3xl mx-auto mb-5 flex items-center justify-center shadow-2xl">
+            <i class="fa-solid fa-file-invoice-dollar text-6xl text-white"></i>
         </div>
-        <div class="flex gap-4 mb-12">
-            <div id="dot-0" class="w-4 h-4 rounded-full border-2 border-blue-500"></div>
-            <div id="dot-1" class="w-4 h-4 rounded-full border-2 border-blue-500"></div>
-            <div id="dot-2" class="w-4 h-4 rounded-full border-2 border-blue-500"></div>
-            <div id="dot-3" class="w-4 h-4 rounded-full border-2 border-blue-500"></div>
+        <h1 class="text-3xl font-black text-white tracking-wider">ASMA'S KHATA</h1>
+        <p id="lockMsg" class="text-amber-400 text-base font-bold mt-2">🔐 ENTER 4-DIGIT PIN</p>
+    </div>
+    <div class="flex gap-6 mb-8">
+        <div id="d0" class="w-5 h-5 rounded-full bg-white/30"></div>
+        <div id="d1" class="w-5 h-5 rounded-full bg-white/30"></div>
+        <div id="d2" class="w-5 h-5 rounded-full bg-white/30"></div>
+        <div id="d3" class="w-5 h-5 rounded-full bg-white/30"></div>
+    </div>
+    <div class="grid grid-cols-3 gap-4 max-w-[320px] w-full">
+        <button class="pin-btn bg-white/10 text-white text-4xl font-bold py-5 rounded-2xl" onclick="pinAdd('1')">1</button>
+        <button class="pin-btn bg-white/10 text-white text-4xl font-bold py-5 rounded-2xl" onclick="pinAdd('2')">2</button>
+        <button class="pin-btn bg-white/10 text-white text-4xl font-bold py-5 rounded-2xl" onclick="pinAdd('3')">3</button>
+        <button class="pin-btn bg-white/10 text-white text-4xl font-bold py-5 rounded-2xl" onclick="pinAdd('4')">4</button>
+        <button class="pin-btn bg-white/10 text-white text-4xl font-bold py-5 rounded-2xl" onclick="pinAdd('5')">5</button>
+        <button class="pin-btn bg-white/10 text-white text-4xl font-bold py-5 rounded-2xl" onclick="pinAdd('6')">6</button>
+        <button class="pin-btn bg-white/10 text-white text-4xl font-bold py-5 rounded-2xl" onclick="pinAdd('7')">7</button>
+        <button class="pin-btn bg-white/10 text-white text-4xl font-bold py-5 rounded-2xl" onclick="pinAdd('8')">8</button>
+        <button class="pin-btn bg-white/10 text-white text-4xl font-bold py-5 rounded-2xl" onclick="pinAdd('9')">9</button>
+        <button class="pin-btn bg-white/10 text-white text-xl font-bold py-5 rounded-2xl" onclick="pinClear()">⌫ CLR</button>
+        <button class="pin-btn bg-white/10 text-white text-4xl font-bold py-5 rounded-2xl" onclick="pinAdd('0')">0</button>
+        <button class="pin-btn bg-red-500/50 text-white text-base font-bold py-5 rounded-2xl" onclick="resetAllData()">🗑️ RESET</button>
+    </div>
+    <p class="text-white/30 text-xs mt-8 text-center">First time: Enter any 4 digits twice</p>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" style="display: none;" class="h-full w-full flex flex-col">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-4 py-4 flex justify-between items-center shadow-xl">
+        <div class="flex items-center gap-3">
+            <button id="backBtn" onclick="goHome()" class="hidden text-2xl"><i class="fa-solid fa-arrow-left"></i></button>
+            <h1 id="title" class="text-xl font-black truncate max-w-[180px]">ASMA'S KHATA</h1>
         </div>
-        <div class="grid grid-cols-3 gap-4 w-full max-w-[280px]">
-            <script>for(let i=1;i<=9;i++) document.write(`<button class="aspect-square rounded-2xl bg-white/5 text-2xl font-bold text-white active:bg-blue-600" onclick="pressKey('${i}')">${i}</button>`);</script>
-            <button class="text-blue-400 font-bold" onclick="currentPinInput='';updateDots()">CLR</button>
-            <button class="aspect-square rounded-2xl bg-white/5 text-2xl font-bold text-white active:bg-blue-600" onclick="pressKey('0')">0</button>
-            <button class="text-red-500 font-bold text-[10px]" onclick="resetPin()">RESET</button>
+        <div class="flex gap-3">
+            <button onclick="lockNow()" class="bg-white/20 px-4 py-2 rounded-xl text-sm font-bold"><i class="fa-solid fa-lock"></i> LOCK</button>
+            <button onclick="openSettingsPanel()" class="bg-white/20 px-4 py-2 rounded-xl text-sm font-bold"><i class="fa-solid fa-gear"></i></button>
         </div>
     </div>
 
-    <div class="app w-full max-w-[480px] mx-auto min-h-screen flex flex-col" id="mainApp" style="display:none;">
-        <header class="header-custom flex justify-between items-center sticky top-0 z-50">
-            <div class="flex items-center gap-2 overflow-hidden">
-                <button id="backBtn" onclick="goHome()" class="hidden text-black text-xl"><i class="fa-solid fa-arrow-left"></i></button>
-                <h1 id="pageTitle" class="text-lg font-black truncate max-w-[150px]">KHATA PRO</h1>
+    <!-- Scrollable Content -->
+    <div class="scrollable-content custom-scroll" id="mainScrollArea">
+        <!-- HOME VIEW -->
+        <div id="homeView">
+            <div class="bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-6 text-center mb-5 shadow-xl">
+                <p class="text-base font-bold opacity-90 text-white">📊 TOTAL OUTSTANDING</p>
+                <p id="totalBal" class="text-5xl font-black mt-2 text-white">₹0</p>
+                <div class="flex justify-center gap-6 mt-3 text-sm font-bold text-white/90">
+                    <span>📆 Month Gave: <span id="monthGave" class="text-lg">0</span></span>
+                    <span>📥 Month Got: <span id="monthGot" class="text-lg">0</span></span>
+                </div>
+                <p id="opShow" class="text-sm mt-3 font-bold bg-white/20 inline-block px-4 py-1 rounded-full text-white">Admin</p>
             </div>
-            <div class="flex gap-1">
-                <button id="custEditBtn" onclick="openCustModal(activeCid)" class="hidden icon-btn-box text-blue-900"><i class="fa-solid fa-user-pen"></i></button>
-                <button onclick="toggleTheme()" class="icon-btn-box text-black"><i id="themeIcon" class="fa-solid fa-sun"></i></button>
-                <button onclick="lockApp()" class="icon-btn-box text-red-900"><i class="fa-solid fa-lock"></i></button>
-                <button onclick="openSettings()" class="icon-btn-box text-black"><i class="fa-solid fa-gear"></i></button>
-            </div>
-        </header>
 
-        <main class="flex-1 p-4 pb-44">
-            <div id="promiseHeader" class="mb-4 space-y-2"></div>
-            <div id="topArea"></div>
-            <div id="dailyRow" class="grid grid-cols-2 gap-2 mb-4 hidden"></div>
-            <div id="searchBox" class="mb-4"></div>
-            <div id="mainContent"></div>
-        </main>
-        
-        <div id="footerActions" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] p-6 rounded-t-[2.5rem] bg-black/40 backdrop-blur-xl"></div>
+            <div class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-4 mb-5 shadow">
+                <div class="flex justify-between items-center mb-2">
+                    <div>
+                        <span class="text-sm font-bold text-purple-700"><i class="fa-regular fa-bell"></i> REMINDERS</span>
+                        <p class="text-[10px] text-purple-600">Payment reminders will appear here</p>
+                    </div>
+                    <button onclick="showReminderHelp()" class="text-purple-600 text-xs bg-white/50 px-3 py-1 rounded-full"><i class="fa-regular fa-circle-question"></i> How?</button>
+                </div>
+                <div id="reminderBox" class="mt-2"></div>
+            </div>
+
+            <div class="relative mb-5">
+                <input type="text" id="search" onkeyup="renderClients()" placeholder="🔍 Search by name or phone..." class="w-full p-4 pl-12 rounded-xl border-2 border-purple-200 bg-white/90 text-base focus:border-purple-500 outline-none">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-4.5 text-purple-400 text-lg"></i>
+            </div>
+
+            <div id="clientList" class="space-y-3 max-h-[40vh] overflow-y-auto custom-scroll"></div>
+
+            <div class="flex gap-3 mt-5 mb-5">
+                <button onclick="newClientModal()" class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg text-base">➕ NEW CLIENT</button>
+                <button onclick="openInterestCalc()" class="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-5 py-4 rounded-xl font-bold shadow-lg text-base"><i class="fa-solid fa-percent"></i></button>
+                <button onclick="backupData()" class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-5 py-4 rounded-xl font-bold shadow-lg text-base"><i class="fa-solid fa-download"></i></button>
+            </div>
+        </div>
+
+        <!-- LEDGER VIEW -->
+        <div id="ledgerView" style="display: none;">
+            <!-- Client Info Card -->
+            <div id="clientCard" class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl p-5 mb-4 shadow-lg"></div>
+            
+            <!-- Current Balance -->
+            <div class="bg-gradient-to-r from-amber-100 to-yellow-100 rounded-xl p-4 text-center mb-4 shadow">
+                <span class="text-sm font-bold text-amber-800">💰 CURRENT BALANCE</span>
+                <p id="balance" class="font-black text-3xl text-amber-900">₹0</p>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="flex gap-2 mb-3 flex-wrap">
+                <button onclick="setFilter('ALL')" id="fAll" class="flex-1 py-3 bg-amber-500 text-white rounded-xl font-bold text-sm shadow">ALL</button>
+                <button onclick="setFilter('GAVE')" id="fGave" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold text-sm shadow">GAVE</button>
+                <button onclick="setFilter('GOT')" id="fGot" class="flex-1 py-3 bg-green-500 text-white rounded-xl font-bold text-sm shadow">GOT</button>
+            </div>
+
+            <div class="flex gap-2 mb-4 flex-wrap">
+                <button onclick="toggleDatePanel()" class="flex-1 py-3 bg-blue-500 text-white rounded-xl font-bold text-sm shadow"><i class="fa-regular fa-calendar"></i> Date Filter</button>
+                <button onclick="printDateWise()" class="flex-1 py-3 bg-indigo-500 text-white rounded-xl font-bold text-sm shadow"><i class="fa-solid fa-print"></i> Print</button>
+                <button onclick="openQuickActions()" class="flex-1 py-3 bg-pink-500 text-white rounded-xl font-bold text-sm shadow"><i class="fa-solid fa-bolt"></i> Actions</button>
+            </div>
+
+            <!-- Date Filter Panel -->
+            <div id="datePanel" class="hidden mb-4 p-3 bg-white/90 rounded-xl flex gap-2 shadow">
+                <input type="date" id="startDate" onchange="renderLedgerTable()" class="flex-1 p-2.5 border rounded-lg text-sm">
+                <input type="date" id="endDate" onchange="renderLedgerTable()" class="flex-1 p-2.5 border rounded-lg text-sm">
+                <button onclick="clearDates()" class="px-4 bg-red-500 text-white rounded-lg text-sm font-bold">Clear</button>
+            </div>
+
+            <!-- Daily Summary -->
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div class="bg-gradient-to-r from-green-100 to-emerald-100 p-3 rounded-xl text-center shadow">
+                    <span class="text-sm font-bold text-green-700">💵 CASH TODAY</span>
+                    <p id="todayCash" class="font-black text-xl text-green-700">₹0</p>
+                </div>
+                <div class="bg-gradient-to-r from-blue-100 to-cyan-100 p-3 rounded-xl text-center shadow">
+                    <span class="text-sm font-bold text-blue-700">📲 UPI TODAY</span>
+                    <p id="todayUpi" class="font-black text-xl text-blue-700">₹0</p>
+                </div>
+            </div>
+
+            <!-- TABLE VIEW - Latest transaction on TOP -->
+            <div class="bg-white rounded-xl shadow-xl overflow-hidden mb-4">
+                <div class="overflow-x-auto" style="max-height: 45vh; overflow-y: auto;">
+                    <table class="ledger-table w-full">
+                        <thead>
+                            <tr style="position: sticky; top: 0; z-index: 10;">
+                                <th class="w-[30%]">DATE (DD/MM/YYYY)</th>
+                                <th class="w-[23%]">GAVE (₹)</th>
+                                <th class="w-[23%]">GOT (₹)</th>
+                                <th class="w-[24%]">BALANCE (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ledgerTableBody">
+                            <tr><td colspan="4" class="text-center py-10 text-gray-400 text-base">No transactions found</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script>
-        const STORAGE_ID = 'KHATA_V550_MASTER';
-        let db = JSON.parse(localStorage.getItem(STORAGE_ID)) || { customers: [], trans: [], promises: [], pin: '1234', upi: '', darkMode: true };
-        let activeCid = null, currentPinInput = "", searchQuery = "";
+    <!-- Fixed Bottom Buttons -->
+    <div class="fixed-bottom-buttons" id="bottomButtons" style="display: none;">
+        <div class="flex gap-3">
+            <button onclick="openTxModal('GAVE')" class="action-btn gave-btn"><i class="fa-solid fa-arrow-up"></i> GAVE</button>
+            <button onclick="openTxModal('GOT')" class="action-btn got-btn"><i class="fa-solid fa-arrow-down"></i> GOT</button>
+        </div>
+    </div>
+</div>
 
-        const saveDB = () => { localStorage.setItem(STORAGE_ID, JSON.stringify(db)); render(); };
-        const getToday = () => new Date().toISOString().split('T')[0];
-        const fmtDate = (d) => d ? d.split('-').reverse().join('/').substring(0,5) : '';
+<!-- MODAL -->
+<div id="modal" class="fixed inset-0 bg-black/70 hidden items-end justify-center z-[1000]" onclick="closeModal()">
+    <div class="bg-white rounded-t-3xl w-full max-w-md p-5 max-h-[85vh] overflow-y-auto" onclick="event.stopPropagation()" id="modalBody"></div>
+</div>
+
+<script>
+    // ==================== DATA ====================
+    let db = {
+        customers: [],
+        transactions: [],
+        promises: [],
+        pin: "",
+        upi: "",
+        operator: "Admin"
+    };
+
+    let activeId = null;
+    let currentPin = "";
+    let confirmPin = "";
+    let txFilter = "ALL";
+
+    // ==================== DATE FUNCTIONS ====================
+    function formatDateToDMY(dateStr) {
+        if(!dateStr) return "";
+        let parts = dateStr.split('-');
+        if(parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        return dateStr;
+    }
+
+    function getTodayYMD() {
+        let d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    // ==================== STORAGE ====================
+    function save() {
+        localStorage.setItem("khata_premium_app", JSON.stringify(db));
+        if(document.getElementById("homeView").style.display !== "none") updateHome();
+        if(activeId) renderLedgerTable();
+    }
+
+    function load() {
+        let saved = localStorage.getItem("khata_premium_app");
+        if(saved) {
+            db = JSON.parse(saved);
+        }
+        updateHome();
+    }
+
+    // ==================== PIN SYSTEM ====================
+    function pinAdd(d) {
+        if(currentPin.length < 4) {
+            currentPin += d;
+            updateDots();
+            if(currentPin.length === 4) setTimeout(() => checkPin(), 100);
+        }
+    }
+
+    function updateDots() {
+        for(let i=0; i<4; i++) {
+            let dot = document.getElementById(`d${i}`);
+            if(dot) {
+                if(i < currentPin.length) {
+                    dot.style.background = "#facc15";
+                    dot.style.boxShadow = "0 0 10px #facc15";
+                } else {
+                    dot.style.background = "rgba(255,255,255,0.3)";
+                    dot.style.boxShadow = "none";
+                }
+            }
+        }
+    }
+
+    function pinClear() { currentPin = ""; updateDots(); }
+
+    function checkPin() {
+        if(!db.pin || db.pin === "") {
+            if(!confirmPin) {
+                confirmPin = currentPin;
+                currentPin = "";
+                updateDots();
+                document.getElementById("lockMsg").innerHTML = "🔄 CONFIRM PIN";
+                return;
+            } else {
+                if(currentPin === confirmPin) {
+                    db.pin = currentPin;
+                    confirmPin = "";
+                    currentPin = "";
+                    save();
+                    unlockApp();
+                } else {
+                    alert("❌ PIN MISMATCH!");
+                    confirmPin = "";
+                    currentPin = "";
+                    updateDots();
+                    document.getElementById("lockMsg").innerHTML = "🔐 CREATE PIN";
+                }
+                return;
+            }
+        }
+        if(currentPin === db.pin) {
+            unlockApp();
+        } else {
+            alert("❌ WRONG PIN!");
+            currentPin = "";
+            updateDots();
+        }
+    }
+
+    function unlockApp() {
+        document.getElementById("lockScreen").style.display = "none";
+        document.getElementById("mainApp").style.display = "flex";
+        load();
+    }
+
+    function lockNow() {
+        currentPin = "";
+        confirmPin = "";
+        updateDots();
+        document.getElementById("lockScreen").style.display = "flex";
+        document.getElementById("mainApp").style.display = "none";
+        document.getElementById("lockMsg").innerHTML = db.pin ? "🔐 ENTER PIN" : "✨ CREATE PIN";
+    }
+
+    function resetAllData() {
+        if(confirm("⚠️ DELETE ALL DATA? This will reset everything!")) {
+            localStorage.removeItem("khata_premium_app");
+            location.reload();
+        }
+    }
+
+    // ==================== HOME ====================
+    function updateHome() {
+        let gave = 0, got = 0;
+        let now = new Date();
+        let monthGave = 0, monthGot = 0;
         
-        function toggleTheme() { db.darkMode = !db.darkMode; saveDB(); }
-        function lockApp() { currentPinInput = ""; updateDots(); document.getElementById('lockScreen').style.display = 'flex'; document.getElementById('mainApp').style.display = 'none'; }
-        function pressKey(n) { if(currentPinInput.length < 4) { currentPinInput += n; updateDots(); if(currentPinInput.length === 4) setTimeout(checkPin, 200); } }
-        function updateDots() { for(let i=0; i<4; i++) document.getElementById(`dot-${i}`).style.background = i < currentPinInput.length ? '#3b82f6' : 'transparent'; }
-        function checkPin() { if(currentPinInput === db.pin || currentPinInput === "1234") { document.getElementById('lockScreen').style.display = 'none'; document.getElementById('mainApp').style.display = 'flex'; render(); } else { alert("Wrong PIN"); currentPinInput = ""; updateDots(); } }
-        function resetPin() { if(confirm("Reset PIN to 1234?")) { db.pin = "1234"; saveDB(); } }
+        db.transactions.forEach(t => {
+            if(t.type === "GAVE") gave += t.amount;
+            else got += t.amount;
+            let td = new Date(t.date);
+            if(td.getMonth() === now.getMonth() && td.getFullYear() === now.getFullYear()) {
+                if(t.type === "GAVE") monthGave += t.amount;
+                else monthGot += t.amount;
+            }
+        });
+        
+        document.getElementById("totalBal").innerHTML = `₹${Math.abs(gave - got).toFixed(2)}`;
+        document.getElementById("monthGave").innerHTML = `₹${monthGave.toFixed(0)}`;
+        document.getElementById("monthGot").innerHTML = `₹${monthGot.toFixed(0)}`;
+        document.getElementById("opShow").innerHTML = db.operator;
 
-        function render() { 
-            document.body.className = db.darkMode ? 'dark-mode' : 'light-mode';
-            document.getElementById('themeIcon').className = db.darkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-            activeCid ? renderDetails() : renderHome(); 
+        let pending = db.promises.filter(p => !p.settled);
+        let html = "";
+        if(pending.length === 0) {
+            html = '<div class="text-center text-gray-500 text-sm py-2">No pending reminders</div>';
+        } else {
+            pending.forEach(p => {
+                let c = db.customers.find(c => c.id === p.cid);
+                if(c) {
+                    html += `<div class="bg-white rounded-lg p-3 mb-2 flex justify-between items-center shadow-sm border-l-4 border-orange-500">
+                        <div><span class="font-bold text-base">${escapeHtml(c.name)}</span><div class="text-xs text-gray-500">₹${p.amount} due by ${formatDateToDMY(p.date)}</div></div>
+                        <button onclick="settlePromise(${p.id})" class="bg-green-500 text-white px-4 py-1.5 rounded-lg text-sm font-bold">✓ Settle</button>
+                    </div>`;
+                }
+            });
+        }
+        document.getElementById("reminderBox").innerHTML = html;
+        renderClients();
+    }
+
+    function renderClients() {
+        let search = document.getElementById("search")?.value.toLowerCase() || "";
+        let filtered = db.customers.filter(c => c.name.toLowerCase().includes(search) || (c.phone && c.phone.includes(search)));
+        
+        let container = document.getElementById("clientList");
+        if(filtered.length === 0) {
+            container.innerHTML = '<div class="text-center text-gray-500 py-10 text-base">No clients found</div>';
+            return;
         }
 
-        function renderHome() {
-            activeCid = null;
-            document.getElementById('backBtn').classList.add('hidden');
-            document.getElementById('custEditBtn').classList.add('hidden');
-            document.getElementById('dailyRow').classList.add('hidden');
-            document.getElementById('pageTitle').innerText = "KHATA PRO";
-            renderPromises();
-            let tGave=0, tGot=0; db.trans.forEach(t => { if(t.type==='GAVE') tGave += t.amt; else tGot += t.amt; });
-            document.getElementById('topArea').innerHTML = `<div class="yellow-card-premium text-center"><p class="text-[11px] font-extrabold opacity-70 uppercase">Net Balance</p><h2 class="text-4xl font-black mt-2">₹${(tGave-tGot).toFixed(2)}</h2></div>`;
-            document.getElementById('searchBox').innerHTML = `<input type="text" oninput="searchQuery=this.value;renderList()" placeholder="Search clients..." class="input-field w-full p-4 rounded-xl outline-none font-bold text-lg">`;
-            renderList();
-            document.getElementById('footerActions').innerHTML = `<button class="w-full p-5 bg-blue-600 rounded-2xl font-black text-xl text-white shadow-xl" onclick="openCustModal()"><i class="fa-solid fa-user-plus mr-2"></i> NEW CLIENT</button>`;
-        }
-
-        function renderDetails() {
-            const cust = db.customers.find(c => c.id === activeCid);
-            if(!cust) { renderHome(); return; }
-            document.getElementById('backBtn').classList.remove('hidden');
-            document.getElementById('custEditBtn').classList.remove('hidden');
-            document.getElementById('dailyRow').classList.remove('hidden');
-            document.getElementById('pageTitle').innerText = cust.name;
-            
-            let rb = 0, cToday = 0, uToday = 0, mGave = 0, mGot = 0;
-            const today = getToday(), now = new Date();
-            let trans = db.trans.filter(t => t.cid === activeCid).sort((a,b)=> new Date(a.date) - new Date(b.date));
-            
-            let rows = trans.map(t => {
-                const d = new Date(t.date);
-                rb += (t.type === 'GAVE' ? t.amt : -t.amt);
-                if(d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) { if(t.type==='GAVE') mGave += t.amt; else mGot += t.amt; }
-                if(t.date === today && t.type === 'GOT') { if(t.mode==='UPI') uToday += t.amt; else cToday += t.amt; }
-                
-                return `<tr onclick="openEditTrans(${t.id})">
-                    <td style="width:20%">${fmtDate(t.date)}<span class="rem-info">${t.rem || ''}</span></td>
-                    <td class="text-red-500" style="width:22%">₹${t.type==='GAVE'?t.amt.toFixed(2):'-'}</td>
-                    <td class="text-green-500" style="width:22%">₹${t.type==='GOT'?t.amt.toFixed(2):'-'}</td>
-                    <td style="width:14%"><span class="mode-badge ${t.mode==='UPI'?'text-blue-500':'text-green-600'}">${t.mode==='UPI'?'U':'C'}</span></td>
-                    <td class="text-right" style="width:22%">₹${rb.toFixed(2)}</td>
-                </tr>`;
-            }).reverse().join('');
-
-            document.getElementById('topArea').innerHTML = `
-                <div class="yellow-card-premium">
-                    <div class="flex justify-between gap-2 mb-6">
-                        <button onclick="shareWA('${cust.phone}', ${rb.toFixed(2)})" class="flex-1 bg-black/10 h-10 rounded-lg flex items-center justify-center"><i class="fa-brands fa-whatsapp text-xl text-green-800"></i></button>
-                        <button onclick="openQR(${Math.abs(rb).toFixed(2)})" class="flex-1 bg-black/10 h-10 rounded-lg flex items-center justify-center"><i class="fa-solid fa-qrcode text-xl text-purple-800"></i></button>
-                        <button onclick="openPDFModal()" class="flex-1 bg-black/10 h-10 rounded-lg flex items-center justify-center"><i class="fa-solid fa-file-pdf text-xl text-blue-800"></i></button>
-                        <button onclick="openPromiseModal()" class="flex-1 bg-black/10 h-10 rounded-lg flex items-center justify-center"><i class="fa-solid fa-calendar-check text-xl text-orange-900"></i></button>
+        let html = "";
+        filtered.forEach(c => {
+            let bal = 0;
+            db.transactions.filter(t => t.cid === c.id).forEach(t => {
+                bal += (t.type === "GAVE" ? t.amount : -t.amount);
+            });
+            html += `
+                <div onclick="openLedger(${c.id})" class="bg-white p-4 rounded-xl shadow-md border-l-4 border-purple-500 flex justify-between items-center cursor-pointer click-card hover:shadow-lg transition">
+                    <div>
+                        <div class="font-bold text-lg text-gray-800">${escapeHtml(c.name)}</div>
+                        <div class="text-sm text-gray-500"><i class="fa-solid fa-phone"></i> ${c.phone || 'No phone'}</div>
                     </div>
-                    <div class="text-center mb-6">
-                        <p class="text-[11px] font-black opacity-70 uppercase">Balance</p>
-                        <h2 class="text-4xl font-black">₹${Math.abs(rb).toFixed(2)}</h2>
+                    <div class="text-right">
+                        <div class="font-black text-xl ${bal >= 0 ? 'text-red-500' : 'text-green-500'}">₹${Math.abs(bal).toFixed(2)}</div>
+                        <div class="text-xs text-gray-400">${bal >= 0 ? 'TO GET' : 'TO GIVE'}</div>
                     </div>
-                    <div class="summary-box">
-                        <div class="summary-item"><p class="summary-label">GAVE</p><p class="summary-value text-red-600">₹${mGave.toFixed(2)}</p></div>
-                        <div class="summary-item"><p class="summary-label">GOT</p><p class="summary-value text-green-800">₹${mGot.toFixed(2)}</p></div>
-                        <div class="summary-item"><p class="summary-label">NET</p><p class="summary-value text-white">₹${(mGave - mGot).toFixed(2)}</p></div>
-                    </div>
-                </div>`;
-
-            document.getElementById('dailyRow').innerHTML = `
-                <div class="card-bg p-3 rounded-xl text-center"><p class="text-[9px] font-black opacity-70">CASH TODAY</p><p class="text-green-500 font-black text-lg">₹${cToday.toFixed(2)}</p></div>
-                <div class="card-bg p-3 rounded-xl text-center"><p class="text-[9px] font-black opacity-70">UPI TODAY</p><p class="text-blue-500 font-black text-lg">₹${uToday.toFixed(2)}</p></div>
+                </div>
             `;
+        });
+        container.innerHTML = html;
+    }
 
-            document.getElementById('mainContent').innerHTML = `
-                <table class="trans-table">
-                    <thead><tr><th style="width:20%">Date</th><th style="width:22%">Gave</th><th style="width:22%">Got</th><th style="width:14%">Mod</th><th class="text-right" style="width:22%">Bal</th></tr></thead>
-                    <tbody>${rows}</tbody>
-                </table>`;
-            document.getElementById('footerActions').innerHTML = `<div class="flex gap-4"><button class="flex-1 p-5 bg-red-600 rounded-3xl font-black text-white text-xl shadow-lg" onclick="openAdd('GAVE')">GAVE</button><button class="flex-1 p-5 bg-green-600 rounded-3xl font-black text-white text-xl shadow-lg" onclick="openAdd('GOT')">GOT</button></div>`;
-        }
+    function goHome() {
+        activeId = null;
+        document.getElementById("homeView").style.display = "block";
+        document.getElementById("ledgerView").style.display = "none";
+        document.getElementById("backBtn").classList.add("hidden");
+        document.getElementById("title").innerHTML = "ASMA'S KHATA";
+        document.getElementById("bottomButtons").style.display = "none";
+        updateHome();
+    }
 
-        function renderList() {
-            let filtered = db.customers.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name));
-            let html = `<div class="space-y-3">`;
-            filtered.forEach(c => {
-                let bal = 0; db.trans.filter(t => t.cid === c.id).forEach(t => bal += (t.type==='GAVE' ? t.amt : -t.amt));
-                html += `<div class="flex items-center p-4 rounded-xl card-bg" onclick="openCustomer(${c.id})"><div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center font-black text-white text-xl">${c.name[0]}</div><div class="flex-1 ml-3"><p class="font-bold text-lg">${c.name}</p></div><div class="text-right"><p class="font-black text-lg ${bal>=0?'text-red-500':'text-green-500'}">₹${Math.abs(bal).toFixed(2)}</p></div></div>`;
-            });
-            document.getElementById('mainContent').innerHTML = html + `</div>`;
-        }
+    // ==================== LEDGER ====================
+    function openLedger(id) {
+        activeId = id;
+        txFilter = "ALL";
+        document.getElementById("homeView").style.display = "none";
+        document.getElementById("ledgerView").style.display = "block";
+        document.getElementById("backBtn").classList.remove("hidden");
+        document.getElementById("bottomButtons").style.display = "block";
+        renderLedgerTable();
+    }
 
-        function renderPromises() {
-            let h = "";
-            db.promises.forEach(p => {
-                const c = db.customers.find(x => x.id === p.cid); if(!c) return;
-                h += `<div class="p-4 rounded-xl flex justify-between items-center mb-2 card-bg" onclick="openCustomer(${c.id})">
-                    <div class="flex-1 text-left"><h3 class="font-bold text-sm">${c.name}: ₹${Number(p.amt).toFixed(2)}</h3><p class="text-[10px] opacity-70">Due: ${fmtDate(p.date)}</p></div>
-                    <div class="flex gap-2">
-                        <button onclick="event.stopPropagation();settlePromise(${p.id})" class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center text-white text-sm"><i class="fa-solid fa-check"></i></button>
-                        <button onclick="event.stopPropagation();deletePromise(${p.id})" class="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center text-white text-sm"><i class="fa-solid fa-trash-can"></i></button>
-                    </div>
-                </div>`;
-            });
-            document.getElementById('promiseHeader').innerHTML = h;
-        }
+    function renderLedgerTable() {
+        let c = db.customers.find(c => c.id === activeId);
+        if(!c) return;
+        document.getElementById("title").innerHTML = c.name;
 
-        function openCustModal(cid=null) {
-            const c = cid ? db.customers.find(x=>x.id===cid) : {name:'', phone:''};
-            openModal(`
-                <h2 class="text-xl font-black mb-4 text-center text-white uppercase">${cid?'Edit':'New'} Client</h2>
-                <input id="cn" class="w-full p-4 rounded-xl mb-3 text-black font-bold text-lg" placeholder="Name" value="${c.name}">
-                <input id="cp" type="number" class="w-full p-4 rounded-xl mb-4 text-black font-bold text-lg" placeholder="Phone" value="${c.phone}">
-                <button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white text-lg" onclick="saveCust(${cid})">SAVE</button>
-                <button class="w-full mt-4 text-gray-400 font-bold" onclick="closeModal()">Cancel</button>
-                ${cid ? `<button class="w-full p-3 bg-red-900 rounded-xl mt-6 font-black text-white text-[12px]" onclick="deleteFullCust(${cid})"><i class="fa-solid fa-trash-can mr-2"></i> DELETE CUSTOMER & HISTORY</button>` : ''}
-            `);
-        }
+        let totalBal = 0;
+        let allTx = db.transactions.filter(t => t.cid === activeId);
+        allTx.forEach(t => { totalBal += (t.type === "GAVE" ? t.amount : -t.amount); });
+        document.getElementById("balance").innerHTML = `₹${Math.abs(totalBal).toFixed(2)}`;
 
-        function saveCust(cid) { let n = document.getElementById('cn').value; if(n) { if(cid) { let c = db.customers.find(x=>x.id===cid); c.name = n; c.phone = document.getElementById('cp').value; } else { db.customers.push({id:Date.now(), name:n, phone:document.getElementById('cp').value}); } saveDB(); closeModal(); } }
-        function deleteFullCust(cid) { if(confirm("ഈ കസ്റ്റമറെയും എല്ലാ ഇടപാടുകളും ഡിലീറ്റ് ചെയ്യണോ?")) { db.customers=db.customers.filter(x=>x.id!==cid); db.trans=db.trans.filter(x=>x.cid!==cid); activeCid=null; saveDB(); closeModal(); } }
-
-        function openAdd(type) {
-            openModal(`
-                <h2 class="text-lg font-black mb-4 text-center text-white uppercase">${type}</h2>
-                <input id="ta" type="number" step="0.01" class="w-full p-4 mb-4 rounded-xl text-3xl text-center text-blue-600 font-bold" placeholder="₹ 0" autofocus>
-                <div class="flex gap-2 mb-4">
-                    <button id="mCash" onclick="setM('CASH')" class="flex-1 p-3 rounded-lg border font-bold text-sm text-white">CASH</button>
-                    <button id="mUpi" onclick="setM('UPI')" class="flex-1 p-3 rounded-lg border font-bold text-sm text-white">UPI</button>
+        document.getElementById("clientCard").innerHTML = `
+            <div class="flex justify-between items-center flex-wrap gap-2">
+                <div><div class="font-black text-xl">${escapeHtml(c.name)}</div><div class="text-sm opacity-80">${c.phone || 'No phone'}</div></div>
+                <div class="flex gap-3">
+                    <button onclick="editClient(${c.id})" class="bg-white/20 px-4 py-2 rounded-xl text-sm font-bold"><i class="fa-solid fa-pen"></i> Edit</button>
+                    <button onclick="addPromise(${c.id})" class="bg-white/20 px-4 py-2 rounded-xl text-sm font-bold"><i class="fa-regular fa-bell"></i> Remind</button>
+                    <button onclick="showQRPayment(Math.abs(totalBal))" class="bg-white/20 px-4 py-2 rounded-xl text-sm font-bold"><i class="fa-solid fa-qrcode"></i> QR</button>
                 </div>
-                <input id="tr" type="text" class="w-full p-4 rounded-xl mb-3 text-black font-bold text-lg" placeholder="Remarks">
-                <input id="td" type="date" class="w-full p-4 rounded-xl mb-4 text-black text-lg" value="${getToday()}">
-                <input type="hidden" id="tm" value="CASH">
-                <button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white shadow-xl text-lg" onclick="saveTrans('${type}')">SAVE</button>
-                <button class="w-full mt-4 text-gray-400 font-bold" onclick="closeModal()">Cancel</button>
-            `);
-            setM('CASH');
-        }
+            </div>
+        `;
 
-        function setM(m) {
-            document.getElementById('tm').value = m;
-            document.getElementById('mCash').className = m==='CASH' ? 'flex-1 p-3 rounded-lg border-yellow-500 bg-yellow-500 text-black font-bold text-sm' : 'flex-1 p-3 rounded-lg border-white/10 bg-white/5 font-bold text-sm';
-            document.getElementById('mUpi').className = m==='UPI' ? 'flex-1 p-3 rounded-lg border-blue-500 bg-blue-500 text-white font-bold text-sm' : 'flex-1 p-3 rounded-lg border-white/10 bg-white/5 font-bold text-sm';
-        }
-
-        function saveTrans(type) { let a=Number(document.getElementById('ta').value), d=document.getElementById('td').value, r=document.getElementById('tr').value, m=document.getElementById('tm').value; if(a && d){ db.trans.push({id:Date.now(), cid:activeCid, type, amt:a, date:d, rem:r, mode:m}); saveDB(); closeModal(); } }
+        let start = document.getElementById("startDate")?.value || "";
+        let end = document.getElementById("endDate")?.value || "";
         
-        function openSettings() {
-            openModal(`
-                <h2 class="text-xl font-black mb-4 text-center text-white uppercase">Settings</h2>
-                <input id="upiI" class="w-full p-4 rounded-xl text-black mb-3 font-bold text-lg" value="${db.upi||''}" placeholder="UPI ID">
-                <input id="pinI" class="w-full p-4 rounded-xl text-black mb-4 font-bold text-lg" value="${db.pin}" placeholder="PIN">
-                <button class="w-full p-4 bg-blue-600 rounded-xl font-bold mb-3 text-white text-lg" onclick="db.upi=document.getElementById('upiI').value;db.pin=document.getElementById('pinI').value;saveDB();closeModal();">APPLY CHANGES</button>
-                <div class="grid grid-cols-2 gap-2 mb-6">
-                    <button class="p-3 bg-green-700 rounded-lg text-white font-bold text-[11px]" onclick="exportData()">BACKUP</button>
-                    <button class="p-3 bg-purple-700 rounded-lg text-white font-bold text-[11px]" onclick="document.getElementById('imp').click()">RESTORE</button>
-                </div>
-                <button class="w-full p-3 bg-red-600 rounded-xl font-black text-white text-[12px] mb-4" onclick="resetAllData()"><i class="fa-solid fa-triangle-exclamation mr-2"></i> DELETE ALL DATA (RESET)</button>
-                <button class="w-full text-gray-400 font-bold" onclick="closeModal()">Close</button>
-                <input type="file" id="imp" class="hidden" onchange="importData(event)">
-            `);
-        }
-
-        function resetAllData() { if(confirm("മുന്നറിയിപ്പ്: എല്ലാ കസ്റ്റമർ വിവരങ്ങളും ഇടപാടുകളും എന്നെന്നേക്കുമായി ഡിലീറ്റ് ചെയ്യപ്പെടും. തുടരണോ?")) { localStorage.removeItem(STORAGE_ID); location.reload(); } }
-
-        function openEditTrans(tid) {
-            const t = db.trans.find(x => x.id === tid);
-            openModal(`
-                <h2 class="text-lg font-black mb-4 text-center text-white">EDIT ENTRY</h2>
-                <input id="eta" type="number" step="0.01" class="w-full p-4 mb-3 rounded-xl text-3xl text-center text-blue-600 font-bold" value="${t.amt}">
-                <input id="etr" type="text" class="w-full p-4 rounded-xl mb-3 text-black font-bold text-lg" value="${t.rem || ''}">
-                <input id="etd" type="date" class="w-full p-4 rounded-xl mb-4 text-black text-lg" value="${t.date}">
-                <button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white mb-2 text-lg" onclick="updateTrans(${tid})">UPDATE</button>
-                <button class="w-full p-4 bg-red-600 rounded-xl font-black text-white mb-4 text-lg" onclick="deleteTrans(${tid})">DELETE ENTRY</button>
-                <button class="w-full text-gray-400 font-bold" onclick="closeModal()">Cancel</button>
-            `);
-        }
-
-        function updateTrans(tid) { const t=db.trans.find(x=>x.id===tid); t.amt=Number(document.getElementById('eta').value); t.rem=document.getElementById('etr').value; t.date=document.getElementById('etd').value; saveDB(); closeModal(); }
-        function deleteTrans(tid) { if(confirm("ഈ എൻട്രി ഡിലീറ്റ് ചെയ്യണോ?")) { db.trans=db.trans.filter(x=>x.id!==tid); saveDB(); closeModal(); } }
+        let filtered = [...allTx];
+        if(txFilter !== "ALL") filtered = filtered.filter(t => t.type === txFilter);
+        if(start) filtered = filtered.filter(t => t.date >= start);
+        if(end) filtered = filtered.filter(t => t.date <= end);
         
-        function openPromiseModal() { openModal(`<h2 class="text-lg font-black mb-4 text-center text-white">ADD PROMISE</h2><input id="pa" type="number" step="0.01" class="w-full p-4 rounded-xl mb-3 text-black font-bold text-lg" placeholder="Amount"><input id="pd" type="date" class="w-full p-4 rounded-xl mb-4 text-black text-lg" value="${getToday()}"><button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white text-lg" onclick="savePromise()">SET PROMISE</button><button class="w-full mt-4 text-gray-400 font-bold" onclick="closeModal()">Cancel</button>`); }
-        function savePromise() { let a=document.getElementById('pa').value, d=document.getElementById('pd').value; if(a&&d){ db.promises.push({id:Date.now(), cid:activeCid, amt:a, date:d}); saveDB(); closeModal(); } }
-        function settlePromise(id) { const p=db.promises.find(x=>x.id===id); db.trans.push({id:Date.now(), cid:p.cid, type:'GOT', amt:Number(p.amt), date:getToday(), mode:'CASH', rem:'Promise Paid'}); db.promises=db.promises.filter(x=>x.id!==id); saveDB(); }
-        function deletePromise(id) { if(confirm("Delete Promise?")) { db.promises=db.promises.filter(x=>x.id!==id); saveDB(); } }
+        // Sort: Latest transaction FIRST (newest on top)
+        filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
 
-        function openPDFModal() {
-            openModal(`
-                <h2 class="mb-4 font-bold text-center text-white">GENERATE REPORT</h2>
-                <div class="space-y-4">
-                    <input id="ps" type="date" class="w-full p-4 rounded-xl text-black text-lg" value="2026-01-01">
-                    <input id="pe" type="date" class="w-full p-4 rounded-xl text-black text-lg" value="${getToday()}">
-                    <button class="w-full p-4 bg-blue-600 rounded-xl font-black text-white text-lg" onclick="generatePDF()">DOWNLOAD PDF</button>
-                    <button class="w-full text-gray-400 font-bold" onclick="closeModal()">Close</button>
-                </div>
-            `);
+        let today = getTodayYMD();
+        let cashToday = 0, upiToday = 0;
+        allTx.filter(t => t.date === today && t.type === "GOT").forEach(t => {
+            if(t.mode === "CASH") cashToday += t.amount;
+            else upiToday += t.amount;
+        });
+        document.getElementById("todayCash").innerHTML = `₹${cashToday.toFixed(0)}`;
+        document.getElementById("todayUpi").innerHTML = `₹${upiToday.toFixed(0)}`;
+
+        let tableBody = document.getElementById("ledgerTableBody");
+        if(filtered.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-gray-400 text-base">No transactions found</td></tr>';
+            return;
         }
 
-        function generatePDF() {
-            const s=document.getElementById('ps').value, e=document.getElementById('pe').value, cust=db.customers.find(c=>c.id===activeCid);
-            const filtered=db.trans.filter(t=>t.cid===activeCid && t.date>=s && t.date<=e).sort((a,b)=>new Date(a.date)-new Date(b.date));
-            const el=document.createElement('div'); el.style.padding="20px"; el.style.background="#fff"; el.style.color="#000"; el.style.fontSize="12px";
-            let rt=0;
-            let rows=filtered.map(t=>{ rt+=(t.type==='GAVE'?t.amt:-t.amt); return `<tr><td style="border:1px solid #ddd;padding:8px">${fmtDate(t.date)}</td><td style="border:1px solid #ddd;padding:8px;color:red">${t.type==='GAVE'?t.amt.toFixed(2):'-'}</td><td style="border:1px solid #ddd;padding:8px;color:green">${t.type==='GOT'?t.amt.toFixed(2):'-'}</td><td style="border:1px solid #ddd;padding:8px">${t.mode||'CASH'}</td><td style="border:1px solid #ddd;padding:8px;font-weight:bold">₹${rt.toFixed(2)}</td></tr>`; }).join('');
-            el.innerHTML=`<h3 style="text-align:center">${cust.name}</h3><table style="width:100%;border-collapse:collapse;margin-top:10px"><thead><tr style="background:#f2f2f2"><th>Date</th><th>Gave</th><th>Got</th><th>Mode</th><th>Bal</th></tr></thead><tbody>${rows}</tbody></table>`;
-            html2pdf().set({ margin: 0.5, filename: `${cust.name}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).from(el).save();
-        }
-
-        function openQR(amt) {
-            if(!db.upi) return alert("Settings-ൽ UPI ID നൽകുക");
-            const cust = db.customers.find(c => c.id === activeCid);
-            openModal(`
-                <div class="bg-white p-4 rounded-3xl flex flex-col items-center">
-                    <div id="qr" class="mb-3"></div>
-                    <p class="text-black font-black text-2xl">₹${Number(amt).toFixed(2)}</p>
-                    <div class="w-full mt-4 space-y-2">
-                        <button onclick="shareWA('${cust ? cust.phone : ''}', ${amt})" class="w-full p-3 rounded-lg bg-green-600 text-white font-bold text-sm"><i class="fa-brands fa-whatsapp"></i> WhatsApp Share</button>
-                        <button onclick="closeModal()" class="w-full p-3 rounded-lg bg-red-500 text-white font-bold text-sm">Close</button>
-                    </div>
-                </div>
-            `);
-            new QRCode(document.getElementById("qr"), { text: `upi://pay?pa=${db.upi}&am=${amt}&cu=INR`, width: 180, height: 180 });
-        }
-
-        function shareWA(p, b) { if(!p) return alert("Phone Number Missing"); const msg = `നിങ്ങളുടെ ബാക്കി തുക: ₹${Math.abs(b).toFixed(2)}. ദയവായി പരിശോധിക്കുക.`; window.open(`https://wa.me/91${p}?text=${encodeURIComponent(msg)}`); }
-        function exportData() { const blob=new Blob([JSON.stringify(db)], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`Khata_Backup.json`; a.click(); }
-        function importData(e) { const reader=new FileReader(); reader.onload=(ev)=>{ try { db=JSON.parse(ev.target.result); saveDB(); location.reload(); } catch(e){alert("Error");} }; reader.readAsText(e.target.files[0]); }
+        // Calculate running balance from OLDEST to NEWEST for accurate balance
+        let chronological = [...allTx];
+        chronological.sort((a,b) => new Date(a.date) - new Date(b.date));
+        let balanceMap = new Map();
+        let running = 0;
+        chronological.forEach(t => {
+            if(t.type === "GAVE") running += t.amount;
+            else running -= t.amount;
+            balanceMap.set(t.id, running);
+        });
         
-        function openCustomer(id) { activeCid = id; render(); }
-        function goHome() { activeCid = null; render(); }
-        function openModal(h) { document.getElementById('modalBox').innerHTML=h; document.getElementById('modalOverlay').style.display='flex'; }
-        function closeModal() { document.getElementById('modalOverlay').style.display='none'; }
-        window.onload = () => { lockApp(); };
-    </script>
+        let rows = "";
+        filtered.forEach(t => {
+            let finalBalance = balanceMap.get(t.id);
+            rows += `
+                <tr class="hover:bg-gray-50 cursor-pointer" onclick="editTransaction(${t.id})">
+                    <td class="text-sm font-medium">
+                        ${formatDateToDMY(t.date)}
+                        <div class="text-[10px] text-gray-400">${t.time || ''} | ${t.mode || 'CASH'}</div>
+                        <div class="text-[11px] text-gray-500 truncate max-w-[100px]">${t.remark || ''}</div>
+                    </td>
+                    <td class="amount-gave">${t.type === 'GAVE' ? '₹'+t.amount.toFixed(2) : '-'}</td>
+                    <td class="amount-got">${t.type === 'GOT' ? '₹'+t.amount.toFixed(2) : '-'}</td>
+                    <td class="${finalBalance >= 0 ? 'balance-positive' : 'balance-negative'}">₹${Math.abs(finalBalance).toFixed(2)}</td>
+                </tr>
+            `;
+        });
+        tableBody.innerHTML = rows;
+    }
 
-    <div id="modalOverlay" class="fixed inset-0 bg-black/80 hidden z-[1000] items-end justify-center p-4" onclick="closeModal()">
-        <div id="modalBox" class="w-full max-w-[420px] bg-[#161b2e] p-5 rounded-t-3xl text-white overflow-y-auto max-h-[85vh] relative" onclick="event.stopPropagation()"></div>
-    </div>
+    function printDateWise() {
+        let c = db.customers.find(c => c.id === activeId);
+        if(!c) return;
+        
+        let start = document.getElementById("startDate")?.value || "";
+        let end = document.getElementById("endDate")?.value || "";
+        
+        let allTx = db.transactions.filter(t => t.cid === activeId);
+        let filtered = [...allTx];
+        if(start) filtered = filtered.filter(t => t.date >= start);
+        if(end) filtered = filtered.filter(t => t.date <= end);
+        filtered.sort((a,b) => new Date(a.date) - new Date(b.date));
+        
+        let runningBalance = 0;
+        let rows = "";
+        filtered.forEach(t => {
+            if(t.type === "GAVE") runningBalance += t.amount;
+            else runningBalance -= t.amount;
+            rows += `<tr><td>${formatDateToDMY(t.date)}</td><td>${t.type==='GAVE'?t.amount:'-'}</td><td>${t.type==='GOT'?t.amount:'-'}</td><td>${Math.abs(runningBalance)}</td></tr>`;
+        });
+        
+        let printHtml = `
+            <html><head><title>${c.name} - Statement</title>
+            <style>body{font-family:sans-serif;padding:20px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:10px;text-align:left}th{background:#f59e0b;color:white}</style>
+            </head>
+            <body>
+                <h2>ASMA'S KHATA - STATEMENT</h2>
+                <p><strong>Client:</strong> ${c.name}</p>
+                <p><strong>Phone:</strong> ${c.phone || '-'}</p>
+                <p><strong>Period:</strong> ${formatDateToDMY(start) || 'Start'} to ${formatDateToDMY(end) || 'Today'}</p>
+                <hr>
+                <table><thead><tr><th>DATE</th><th>GAVE</th><th>GOT</th><th>BALANCE</th></tr></thead>
+                <tbody>${rows || '<tr><td colspan="4">No transactions</td></tr>'}</tbody>
+                </table>
+                <p>Printed: ${new Date().toLocaleString()}</p>
+            </body></html>
+        `;
+        let win = window.open();
+        win.document.write(printHtml);
+        win.print();
+    }
+
+    function editTransaction(tid) {
+        let t = db.transactions.find(t => t.id === tid);
+        if(!t) return;
+        document.getElementById("modalBody").innerHTML = `
+            <h3 class="font-black text-xl text-center mb-4">✏️ EDIT TRANSACTION</h3>
+            <div class="mb-3 p-3 bg-gray-100 rounded-lg text-center"><span class="text-sm font-bold">${formatDateToDMY(t.date)} | ${t.time}</span></div>
+            <input type="number" id="editAmt" value="${t.amount}" class="w-full p-4 text-3xl text-center font-black rounded-xl border mb-3">
+            <input type="text" id="editRem" value="${t.remark || ''}" placeholder="Remarks" class="w-full p-3 rounded-xl border mb-3 text-base">
+            <div class="flex gap-2 mb-3">
+                <button onclick="updateMode('CASH')" id="editCashBtn" class="flex-1 py-3 ${t.mode==='CASH'?'bg-amber-400':'bg-gray-200'} rounded-xl font-bold text-base">CASH</button>
+                <button onclick="updateMode('UPI')" id="editUpiBtn" class="flex-1 py-3 ${t.mode==='UPI'?'bg-blue-600 text-white':'bg-gray-200'} rounded-xl font-bold text-base">UPI</button>
+            </div>
+            <input type="hidden" id="editMode" value="${t.mode || 'CASH'}">
+            <button onclick="updateTransaction(${tid})" class="w-full bg-blue-600 text-white p-4 rounded-xl font-black text-base">UPDATE</button>
+            <button onclick="deleteTransaction(${tid})" class="w-full mt-2 bg-red-500 text-white p-3 rounded-xl font-bold text-base">DELETE</button>
+            <button onclick="closeModal()" class="w-full mt-2 text-gray-500 py-2">Cancel</button>
+        `;
+        document.getElementById("modal").style.display = "flex";
+        updateMode(t.mode || 'CASH');
+    }
+
+    function updateMode(m) {
+        document.getElementById("editMode").value = m;
+        let cash = document.getElementById("editCashBtn");
+        let upi = document.getElementById("editUpiBtn");
+        if(m === 'CASH') {
+            cash.className = "flex-1 py-3 bg-amber-400 rounded-xl font-bold text-base";
+            upi.className = "flex-1 py-3 bg-gray-200 rounded-xl font-bold text-base";
+        } else {
+            cash.className = "flex-1 py-3 bg-gray-200 rounded-xl font-bold text-base";
+            upi.className = "flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold text-base";
+        }
+    }
+
+    function updateTransaction(tid) {
+        let t = db.transactions.find(t => t.id === tid);
+        if(t) {
+            t.amount = parseFloat(document.getElementById("editAmt").value);
+            t.remark = document.getElementById("editRem").value;
+            t.mode = document.getElementById("editMode").value;
+            save();
+            closeModal();
+            renderLedgerTable();
+        }
+    }
+
+    function deleteTransaction(tid) {
+        if(confirm("Delete this transaction permanently?")) {
+            db.transactions = db.transactions.filter(t => t.id !== tid);
+            save();
+            closeModal();
+            renderLedgerTable();
+        }
+    }
+
+    function setFilter(f) {
+        txFilter = f;
+        document.getElementById("fAll").className = "flex-1 py-3 rounded-xl font-bold text-sm shadow " + (f === "ALL" ? "bg-amber-600 text-white" : "bg-gray-300 text-gray-700");
+        document.getElementById("fGave").className = "flex-1 py-3 rounded-xl font-bold text-sm shadow " + (f === "GAVE" ? "bg-red-600 text-white" : "bg-gray-300 text-gray-700");
+        document.getElementById("fGot").className = "flex-1 py-3 rounded-xl font-bold text-sm shadow " + (f === "GOT" ? "bg-green-600 text-white" : "bg-gray-300 text-gray-700");
+        renderLedgerTable();
+    }
+
+    function toggleDatePanel() { document.getElementById("datePanel").classList.toggle("hidden"); }
+    function clearDates() { document.getElementById("startDate").value = ""; document.getElementById("endDate").value = ""; renderLedgerTable(); }
+
+    function openQuickActions() {
+        let bal = 0;
+        db.transactions.filter(t => t.cid === activeId).forEach(t => { bal += (t.type === "GAVE" ? t.amount : -t.amount); });
+        let c = db.customers.find(c => c.id === activeId);
+        document.getElementById("modalBody").innerHTML = `
+            <h3 class="font-black text-xl text-center mb-4">⚡ QUICK ACTIONS</h3>
+            <button onclick="sendWhatsApp('${c?.phone || ''}', ${Math.abs(bal)})" class="w-full p-3 bg-green-600 text-white rounded-xl font-bold mb-2"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
+            <button onclick="showQRPayment(${Math.abs(bal)})" class="w-full p-3 bg-purple-600 text-white rounded-xl font-bold mb-2"><i class="fa-solid fa-qrcode"></i> QR Code</button>
+            <button onclick="closeModal()" class="w-full p-3 bg-gray-200 text-gray-700 rounded-xl font-bold">Close</button>
+        `;
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    // ==================== TRANSACTIONS WITH DATE CHANGE OPTION ====================
+    function openTxModal(type) {
+        let now = new Date();
+        let today = getTodayYMD();
+        let time = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
+        document.getElementById("modalBody").innerHTML = `
+            <h3 class="font-black text-xl text-center mb-4">${type === 'GAVE' ? '📤 GAVE MONEY' : '📥 GOT MONEY'}</h3>
+            <div class="mb-3">
+                <label class="text-xs font-bold text-gray-500">📅 DATE (Click to change)</label>
+                <input type="date" id="txDate" value="${today}" class="w-full p-3 rounded-xl border mt-1 text-base">
+            </div>
+            <input type="number" id="amt" placeholder="Amount" class="w-full p-4 text-3xl text-center font-black rounded-xl border mb-3" autofocus>
+            <input type="text" id="rem" placeholder="Remarks" class="w-full p-3 rounded-xl border mb-3 text-base">
+            <div class="flex gap-2 mb-3">
+                <button onclick="setTxMode('CASH')" id="cashBtn" class="flex-1 py-3 bg-amber-400 rounded-xl font-bold text-base">💵 CASH</button>
+                <button onclick="setTxMode('UPI')" id="upiBtn" class="flex-1 py-3 bg-gray-200 rounded-xl font-bold text-base">📲 UPI</button>
+            </div>
+            <input type="hidden" id="txMode" value="CASH">
+            <button onclick="saveTx('${type}', '${time}')" class="w-full bg-blue-600 text-white p-4 rounded-xl font-black text-base">SAVE</button>
+            <button onclick="closeModal()" class="w-full mt-2 text-gray-500 py-2">Cancel</button>
+        `;
+        document.getElementById("modal").style.display = "flex";
+        setTxMode('CASH');
+    }
+
+    function setTxMode(m) {
+        document.getElementById("txMode").value = m;
+        let cash = document.getElementById("cashBtn");
+        let upi = document.getElementById("upiBtn");
+        if(m === 'CASH') {
+            cash.className = "flex-1 py-3 bg-amber-400 rounded-xl font-bold text-base";
+            upi.className = "flex-1 py-3 bg-gray-200 rounded-xl font-bold text-base";
+        } else {
+            cash.className = "flex-1 py-3 bg-gray-200 rounded-xl font-bold text-base";
+            upi.className = "flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold text-base";
+        }
+    }
+
+    function saveTx(type, time) {
+        let amt = parseFloat(document.getElementById("amt").value);
+        if(isNaN(amt) || amt <= 0) { alert("Valid amount required"); return; }
+        let rem = document.getElementById("rem").value;
+        let mode = document.getElementById("txMode").value;
+        let date = document.getElementById("txDate").value;
+
+        db.transactions.push({
+            id: Date.now(), cid: activeId, type: type, amount: amt,
+            date: date, time: time, remark: rem, mode: mode, staff: db.operator
+        });
+        save();
+        closeModal();
+        renderLedgerTable();
+    }
+
+    // ==================== CLIENTS ====================
+    function newClientModal() {
+        document.getElementById("modalBody").innerHTML = `
+            <h3 class="font-black text-xl text-center mb-4 text-purple-600">➕ NEW CLIENT</h3>
+            <input id="name" placeholder="Full Name" class="w-full p-3 rounded-xl border-2 border-purple-200 mb-3 focus:border-purple-500 outline-none text-base">
+            <input id="phone" placeholder="Phone Number" class="w-full p-3 rounded-xl border-2 border-purple-200 mb-4 focus:border-purple-500 outline-none text-base">
+            <button onclick="addClient()" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 rounded-xl font-bold text-base">CREATE CLIENT</button>
+            <button onclick="closeModal()" class="w-full mt-2 text-gray-500 py-2">Cancel</button>
+        `;
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function addClient() {
+        let name = document.getElementById("name").value.trim();
+        if(!name) { alert("Name required"); return; }
+        let phone = document.getElementById("phone").value.trim();
+        db.customers.push({ id: Date.now(), name: name, phone: phone });
+        save();
+        closeModal();
+        renderClients();
+        alert("✅ Client saved successfully!");
+    }
+
+    function editClient(id) {
+        let c = db.customers.find(c => c.id === id);
+        document.getElementById("modalBody").innerHTML = `
+            <h3 class="font-black text-xl text-center mb-4">✏️ EDIT CLIENT</h3>
+            <input id="name" value="${c.name}" class="w-full p-3 rounded-xl border mb-3 text-base">
+            <input id="phone" value="${c.phone || ''}" class="w-full p-3 rounded-xl border mb-4 text-base">
+            <button onclick="updateClient(${id})" class="w-full bg-blue-600 text-white p-4 rounded-xl font-bold text-base">UPDATE</button>
+            <button onclick="deleteClient(${id})" class="w-full mt-2 bg-red-500 text-white p-3 rounded-xl font-bold text-base">DELETE CLIENT</button>
+            <button onclick="closeModal()" class="w-full mt-2 text-gray-500 py-2">Cancel</button>
+        `;
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function updateClient(id) {
+        let c = db.customers.find(c => c.id === id);
+        c.name = document.getElementById("name").value.trim();
+        c.phone = document.getElementById("phone").value.trim();
+        save();
+        closeModal();
+        if(activeId === id) renderLedgerTable();
+        renderClients();
+        alert("✅ Client updated!");
+    }
+
+    function deleteClient(id) {
+        if(confirm("Delete client and all transactions?")) {
+            db.customers = db.customers.filter(c => c.id !== id);
+            db.transactions = db.transactions.filter(t => t.cid !== id);
+            db.promises = db.promises.filter(p => p.cid !== id);
+            save();
+            closeModal();
+            if(activeId === id) goHome();
+            renderClients();
+            alert("✅ Client deleted!");
+        }
+    }
+
+    // ==================== REMINDERS ====================
+    function addPromise(cid) {
+        document.getElementById("modalBody").innerHTML = `
+            <h3 class="font-black text-xl text-center mb-4 text-orange-600">📌 ADD PAYMENT REMINDER</h3>
+            <p class="text-xs text-gray-500 text-center mb-3">When you add a reminder, it will appear on home screen</p>
+            <input type="number" id="amt" placeholder="Amount" class="w-full p-3 rounded-xl border mb-3 text-base">
+            <input type="date" id="date" value="${getTodayYMD()}" class="w-full p-3 rounded-xl border mb-4 text-base">
+            <button onclick="savePromise(${cid})" class="w-full bg-orange-500 text-white p-4 rounded-xl font-bold text-base">ADD REMINDER</button>
+            <button onclick="closeModal()" class="w-full mt-2 text-gray-500 py-2">Cancel</button>
+        `;
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function savePromise(cid) {
+        let amt = parseFloat(document.getElementById("amt").value);
+        let date = document.getElementById("date").value;
+        if(isNaN(amt) || amt <= 0) { alert("Valid amount required"); return; }
+        db.promises.push({ id: Date.now(), cid: cid, amount: amt, date: date, settled: false });
+        save();
+        closeModal();
+        updateHome();
+        alert("✅ Reminder added! It will appear on home screen.");
+    }
+
+    function settlePromise(id) {
+        let p = db.promises.find(p => p.id === id);
+        if(p) p.settled = true;
+        save();
+        updateHome();
+        alert("✅ Reminder settled!");
+    }
+
+    function showReminderHelp() {
+        document.getElementById("modalBody").innerHTML = `
+            <h3 class="font-black text-xl text-center mb-4 text-purple-600">📌 HOW REMINDER WORKS</h3>
+            <div class="space-y-3 text-base">
+                <div class="p-3 bg-purple-50 rounded-xl flex items-center gap-3"><i class="fa-solid fa-1-circle text-purple-600 text-xl"></i><span> Open any client's ledger</span></div>
+                <div class="p-3 bg-purple-50 rounded-xl flex items-center gap-3"><i class="fa-solid fa-2-circle text-purple-600 text-xl"></i><span> Click the "Remind" button (🔔 icon)</span></div>
+                <div class="p-3 bg-purple-50 rounded-xl flex items-center gap-3"><i class="fa-solid fa-3-circle text-purple-600 text-xl"></i><span> Enter Amount and Due Date</span></div>
+                <div class="p-3 bg-purple-50 rounded-xl flex items-center gap-3"><i class="fa-solid fa-4-circle text-purple-600 text-xl"></i><span> Reminder appears on HOME screen</span></div>
+                <div class="p-3 bg-purple-50 rounded-xl flex items-center gap-3"><i class="fa-solid fa-5-circle text-purple-600 text-xl"></i><span> Click "Settle" when payment received</span></div>
+            </div>
+            <button onclick="closeModal()" class="w-full mt-4 bg-purple-600 text-white p-3 rounded-xl font-bold text-base">Got it!</button>
+        `;
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    // ==================== EXTRA FEATURES ====================
+    function openInterestCalc() {
+        document.getElementById("modalBody").innerHTML = `
+            <h3 class="font-black text-xl text-center mb-4">💰 INTEREST CALCULATOR</h3>
+            <input type="number" id="pAmount" placeholder="Principal Amount" class="w-full p-3 rounded-xl border mb-3 text-base">
+            <input type="number" id="rate" placeholder="Interest Rate %" value="12" class="w-full p-3 rounded-xl border mb-3 text-base">
+            <input type="number" id="months" placeholder="Months" value="1" class="w-full p-3 rounded-xl border mb-3 text-base">
+            <button onclick="calcInterest()" class="w-full bg-purple-600 text-white p-4 rounded-xl font-bold text-base">CALCULATE</button>
+            <div id="interestResult" class="mt-3 p-3 bg-gray-100 rounded-xl text-center hidden text-base"></div>
+            <button onclick="closeModal()" class="w-full mt-2 text-gray-500 py-2">Close</button>
+        `;
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function calcInterest() {
+        let p = parseFloat(document.getElementById("pAmount").value);
+        let r = parseFloat(document.getElementById("rate").value);
+        let m = parseFloat(document.getElementById("months").value);
+        if(isNaN(p) || isNaN(r) || isNaN(m)) { alert("Enter valid numbers"); return; }
+        let interest = (p * r * (m / 12)) / 100;
+        document.getElementById("interestResult").innerHTML = `<span class="font-black text-purple-600">Interest: ₹${interest.toFixed(2)}</span><br><span class="text-sm">Total: ₹${(p + interest).toFixed(2)}</span>`;
+        document.getElementById("interestResult").classList.remove("hidden");
+    }
+
+    function showQRPayment(amount) {
+        if(!db.upi) { alert("Please set UPI ID in Settings first"); return; }
+        document.getElementById("modalBody").innerHTML = `
+            <h3 class="font-black text-xl text-center mb-4">📱 QR CODE PAYMENT</h3>
+            <div class="text-center mb-4">Amount: <span class="font-black text-3xl text-purple-600">₹${amount.toFixed(2)}</span></div>
+            <div id="qrCodeDiv" class="flex justify-center mb-4"></div>
+            <p class="text-sm text-center text-gray-500">UPI: ${db.upi}</p>
+            <button onclick="closeModal()" class="w-full mt-4 text-gray-500 py-2">Close</button>
+        `;
+        document.getElementById("modal").style.display = "flex";
+        document.getElementById("qrCodeDiv").innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=${db.upi}&am=${amount}&cu=INR" class="mx-auto rounded-xl shadow">`;
+    }
+
+    function sendWhatsApp(phone, amount) {
+        if(!phone) { alert("No phone number found"); return; }
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(`Hello, your outstanding balance is ₹${amount.toFixed(2)}. Please settle at earliest. - ASMA'S KHATA`)}`, '_blank');
+        closeModal();
+    }
+
+    // ==================== BACKUP & RESTORE ====================
+    function backupData() {
+        try {
+            let dataStr = JSON.stringify(db, null, 2);
+            let blob = new Blob([dataStr], {type: "application/json"});
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            let date = new Date();
+            a.download = `khata_backup_${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            alert("✅ Backup downloaded successfully!");
+        } catch(e) {
+            alert("Error creating backup: " + e.message);
+        }
+    }
+
+    function restoreData() {
+        let input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'application/json';
+        input.onchange = function(e) {
+            let file = e.target.files[0];
+            if(!file) {
+                alert("Please select a backup file");
+                return;
+            }
+            let reader = new FileReader();
+            reader.onload = function(ev) {
+                try {
+                    let restored = JSON.parse(ev.target.result);
+                    if(restored.hasOwnProperty('customers') && restored.hasOwnProperty('transactions') && restored.hasOwnProperty('promises')) {
+                        let oldPin = db.pin;
+                        db = restored;
+                        if(!db.pin && oldPin) {
+                            db.pin = oldPin;
+                        }
+                        save();
+                        alert("✅ Data restored successfully!");
+                        if(document.getElementById("homeView").style.display !== "none") {
+                            updateHome();
+                        }
+                        if(activeId) {
+                            renderLedgerTable();
+                        }
+                        closeModal();
+                    } else {
+                        alert("Invalid backup file format. Please select a valid backup file.");
+                    }
+                } catch(err) {
+                    alert("Error reading backup file: " + err.message);
+                }
+            };
+            reader.onerror = function() {
+                alert("Error reading file");
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    }
+
+    // ==================== SETTINGS ====================
+    function openSettingsPanel() {
+        document.getElementById("modalBody").innerHTML = `
+            <h3 class="font-black text-xl text-center mb-4 text-purple-600">⚙️ SETTINGS</h3>
+            <div class="mb-3"><label class="text-sm font-bold">UPI ID</label><input id="upi" value="${db.upi || ''}" placeholder="your@upi" class="w-full p-3 rounded-xl border mt-1 text-base"></div>
+            <div class="mb-3"><label class="text-sm font-bold">Operator Name</label><input id="op" value="${db.operator}" class="w-full p-3 rounded-xl border mt-1 text-base"></div>
+            <div class="mb-3"><label class="text-sm font-bold">Change PIN (4 digits)</label><input id="pin" type="number" placeholder="New PIN" class="w-full p-3 rounded-xl border mt-1 text-base"></div>
+            <button onclick="saveSettings()" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 rounded-xl font-bold text-base">SAVE SETTINGS</button>
+            <button onclick="restoreData()" class="w-full mt-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white p-3 rounded-xl font-bold text-base">📂 RESTORE BACKUP</button>
+            <button onclick="closeModal()" class="w-full mt-2 text-gray-500 py-2">Close</button>
+        `;
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    function saveSettings() {
+        let upi = document.getElementById("upi").value;
+        let op = document.getElementById("op").value;
+        let pin = document.getElementById("pin").value;
+        if(upi) db.upi = upi;
+        if(op) db.operator = op;
+        if(pin && pin.length === 4) db.pin = pin;
+        save();
+        closeModal();
+        updateHome();
+        alert("✅ Settings saved!");
+    }
+
+    function escapeHtml(str) {
+        if(!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if(m === '&') return '&amp;';
+            if(m === '<') return '&lt;';
+            if(m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function closeModal() {
+        document.getElementById("modal").style.display = "none";
+    }
+
+    // START
+    console.log("Premium App Ready - Latest transaction on TOP, Date can be changed!");
+</script>
 </body>
 </html>
